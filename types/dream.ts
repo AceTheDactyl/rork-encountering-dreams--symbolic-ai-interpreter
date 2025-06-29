@@ -3,17 +3,23 @@ export interface Dream {
   title: string;
   content: string;
   date: string;
-  mood?: string;
+  mood: string;
   symbols: string[];
   themes: string[];
   isLucid: boolean;
   isRecurring: boolean;
+  interpretation?: string;
+  patterns?: string[];
 }
 
-export type Persona = "orion" | "limnus";
+export interface DreamSymbol {
+  symbol: string;
+  name: string;
+  meaning: string;
+}
 
-export interface DreamInterpretation {
-  interpretation: string;
-  persona: Persona;
-  timestamp: string;
+export interface DreamTheme {
+  id: string;
+  name: string;
+  symbol: string;
 }
