@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, Pressable, Share } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Share2, Trash2, Edit } from 'lucide-react-native';
+import { Share2, Trash2, Sparkles } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useDreamStore } from '@/store/dreamStore';
 import { dreamThemes } from '@/constants/symbols';
-import { generateBasicInterpretation } from '@/utils/dreamAnalysis';
 import Button from '@/components/Button';
 
 export default function DreamDetailScreen() {
@@ -54,7 +53,11 @@ export default function DreamDetailScreen() {
     try {
       await Share.share({
         title: dream.title,
-        message: `Dream: ${dream.title}\n\n${dream.content}\n\nRecorded on ${formatDate(dream.date)}`,
+        message: `Dream: ${dream.title}
+
+${dream.content}
+
+Recorded on ${formatDate(dream.date)}`,
       });
     } catch (error) {
       console.error(error);
@@ -71,10 +74,9 @@ export default function DreamDetailScreen() {
   };
   
   const handleViewAnalysis = () => {
-    const interpretation = generateBasicInterpretation(dream);
     router.push({
       pathname: '/analysis',
-      params: { dreamId: dream.id, interpretation }
+      params: { dreamId: dream.id }
     });
   };
   
@@ -138,9 +140,10 @@ export default function DreamDetailScreen() {
       
       <View style={styles.actionsContainer}>
         <Button
-          label="Analyze Dream"
+          label="AI Analysis"
           onPress={handleViewAnalysis}
           style={styles.analyzeButton}
+          icon={<Sparkles size={20} color={Colors.dark.background} />}
         />
         
         <View style={styles.iconButtonsContainer}>

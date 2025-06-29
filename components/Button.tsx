@@ -1,197 +1,123 @@
 import React from 'react';
-import { 
-  StyleSheet, 
-  Text, 
-  TouchableOpacity, 
-  ActivityIndicator,
-  ViewStyle,
-  TextStyle,
-  StyleProp
-} from 'react-native';
+import { Pressable, Text, StyleSheet, ViewStyle, ActivityIndicator, View } from 'react-native';
 import Colors from '@/constants/colors';
 
 interface ButtonProps {
   label: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'text';
-  size?: 'small' | 'medium' | 'large';
+  variant?: 'primary' | 'outline' | 'secondary';
+  style?: ViewStyle;
   isLoading?: boolean;
   disabled?: boolean;
-  style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
   icon?: React.ReactNode;
 }
 
-export default function Button({
-  label,
-  onPress,
-  variant = 'primary',
-  size = 'medium',
+export default function Button({ 
+  label, 
+  onPress, 
+  variant = 'primary', 
+  style, 
   isLoading = false,
   disabled = false,
-  style,
-  textStyle,
   icon
 }: ButtonProps) {
   const getButtonStyle = () => {
     switch (variant) {
-      case 'primary':
-        return styles.primaryButton;
-      case 'secondary':
-        return styles.secondaryButton;
       case 'outline':
-        return styles.outlineButton;
-      case 'text':
-        return styles.textButton;
+        return [styles.button, styles.outlineButton];
+      case 'secondary':
+        return [styles.button, styles.secondaryButton];
       default:
-        return styles.primaryButton;
+        return [styles.button, styles.primaryButton];
     }
   };
   
   const getTextStyle = () => {
     switch (variant) {
-      case 'primary':
-        return styles.primaryText;
-      case 'secondary':
-        return styles.secondaryText;
       case 'outline':
-        return styles.outlineText;
-      case 'text':
-        return styles.textButtonText;
+        return [styles.text, styles.outlineText];
+      case 'secondary':
+        return [styles.text, styles.secondaryText];
       default:
-        return styles.primaryText;
+        return [styles.text, styles.primaryText];
     }
   };
   
-  const getSizeStyle = () => {
-    switch (size) {
-      case 'small':
-        return styles.smallButton;
-      case 'medium':
-        return styles.mediumButton;
-      case 'large':
-        return styles.largeButton;
-      default:
-        return styles.mediumButton;
-    }
-  };
-  
-  const getTextSizeStyle = () => {
-    switch (size) {
-      case 'small':
-        return styles.smallText;
-      case 'medium':
-        return styles.mediumText;
-      case 'large':
-        return styles.largeText;
-      default:
-        return styles.mediumText;
-    }
-  };
+  const isDisabled = disabled || isLoading;
   
   return (
-    <TouchableOpacity
-      style={[
-        styles.button,
-        getButtonStyle(),
-        getSizeStyle(),
-        disabled && styles.disabledButton,
+    <Pressable
+      style={({ pressed }) => [
+        ...getButtonStyle(),
         style,
+        pressed && styles.pressed,
+        isDisabled && styles.disabled,
       ]}
       onPress={onPress}
-      disabled={disabled || isLoading}
-      activeOpacity={0.8}
+      disabled={isDisabled}
     >
-      {isLoading ? (
-        <ActivityIndicator 
-          color={variant === 'outline' || variant === 'text' ? Colors.dark.primary : Colors.dark.text} 
-          size="small" 
-        />
-      ) : (
-        <>
-          {icon}
-          <Text 
-            style={[
-              styles.text,
-              getTextStyle(),
-              getTextSizeStyle(),
-              disabled && styles.disabledText,
-              icon && styles.textWithIcon,
-              textStyle,
-            ]}
-          >
-            {label}
-          </Text>
-        </>
-      )}
-    </TouchableOpacity>
+      <View style={styles.content}>
+        {isLoading ? (
+          <ActivityIndicator 
+            size="small" 
+            color={variant === 'outline' ? Colors.dark.text : Colors.dark.background} 
+          />
+        ) : (
+          <>
+            {icon && <View style={styles.iconContainer}>{icon}</View>}
+            <Text style={getTextStyle()}>{label}</Text>
+          </>
+        )}
+      </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
     borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: 52,
+  },
+  content: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconContainer: {
+    marginRight: 8,
   },
   primaryButton: {
     backgroundColor: Colors.dark.primary,
   },
+  outlineButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: Colors.dark.border,
+  },
   secondaryButton: {
     backgroundColor: Colors.dark.secondary,
   },
-  outlineButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: Colors.dark.primary,
-  },
-  textButton: {
-    backgroundColor: 'transparent',
-  },
-  smallButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  mediumButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-  },
-  largeButton: {
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-  },
-  disabledButton: {
-    opacity: 0.5,
-  },
   text: {
+    fontSize: 16,
     fontWeight: '600',
   },
   primaryText: {
+    color: Colors.dark.background,
+  },
+  outlineText: {
     color: Colors.dark.text,
   },
   secondaryText: {
-    color: Colors.dark.text,
+    color: Colors.dark.background,
   },
-  outlineText: {
-    color: Colors.dark.primary,
+  pressed: {
+    opacity: 0.8,
   },
-  textButtonText: {
-    color: Colors.dark.primary,
-  },
-  smallText: {
-    fontSize: 14,
-  },
-  mediumText: {
-    fontSize: 16,
-  },
-  largeText: {
-    fontSize: 18,
-  },
-  disabledText: {
-    opacity: 0.7,
-  },
-  textWithIcon: {
-    marginLeft: 8,
+  disabled: {
+    opacity: 0.5,
   },
 });
