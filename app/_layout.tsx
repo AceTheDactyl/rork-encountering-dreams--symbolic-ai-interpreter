@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated/lib/reanimated2/js-reanimated';
 import { useColorScheme } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { trpc } from '@/lib/trpc';
+import { trpc, trpcClient } from '@/lib/trpc';
 import { useState } from 'react';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -20,9 +20,6 @@ export default function RootLayout() {
   });
 
   const [queryClient] = useState(() => new QueryClient());
-  const [trpcClient] = useState(() => trpc.createClient({
-    url: '/api/trpc',
-  }));
 
   useEffect(() => {
     if (loaded) {
