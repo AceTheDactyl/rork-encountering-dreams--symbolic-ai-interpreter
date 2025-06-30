@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Dream } from '@/types/dream';
 
-export type SortOption = 'date-desc' | 'date-asc' | 'type' | 'persona';
+export type SortOption = 'type' | 'persona' | 'mnemonic' | 'psychic' | 'pre-echo' | 'lucid' | 'meta-lucid';
 
 interface DreamState {
   dreams: Dream[];
@@ -16,44 +16,25 @@ interface DreamState {
   getGroupedDreams: () => { groupTitle: string; dreams: Dream[] }[];
 }
 
-const sortDreams = (dreams: Dream[], sortBy: SortOption): Dream[] => {
-  const dreamsCopy = [...dreams];
+const filterAndSortDreams = (dreams: Dream[], sortBy: SortOption): Dream[] => {
+  let filteredDreams = [...dreams];
   
-  switch (sortBy) {
-    case 'date-desc':
-      return dreamsCopy.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    
-    case 'date-asc':
-      return dreamsCopy.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    
-    case 'type':
-      // Sort by dream type, then by date desc within each type
-      return dreamsCopy.sort((a, b) => {
-        if (a.dreamType !== b.dreamType) {
-          return a.dreamType.localeCompare(b.dreamType);
-        }
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      });
-    
-    case 'persona':
-      // Sort by persona, then by date desc within each persona
-      return dreamsCopy.sort((a, b) => {
-        if (a.persona !== b.persona) {
-          return a.persona.localeCompare(b.persona);
-        }
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      });
-    
-    default:
-      return dreamsCopy;
+  // Filter by specific dream type if selected
+  if (['mnemonic', 'psychic', 'pre-echo', 'lucid', 'meta-lucid'].includes(sortBy)) {
+    filteredDreams = dreams.filter(dream => dream.dreamType === sortBy);
   }
+  
+  // Always sort by date desc within filtered results
+  return filteredDreams.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
 const groupDreams = (dreams: Dream[], sortBy: SortOption): { groupTitle: string; dreams: Dream[] }[] => {
-  if (sortBy !== 'type' && sortBy !== 'persona') {
+  // For specific dream type filters, don't group - just return all dreams
+  if (['mnemonic', 'psychic', 'pre-echo', 'lucid', 'meta-lucid'].includes(sortBy)) {
     return [{ groupTitle: '', dreams }];
   }
 
+  // For 'type' and 'persona' sorting, group the dreams
   const groups: { [key: string]: Dream[] } = {};
   
   dreams.forEach(dream => {
@@ -89,7 +70,7 @@ export const useDreamStore = create<DreamState>()(
   persist(
     (set, get) => ({
       dreams: [],
-      sortBy: 'date-desc',
+      sortBy: 'type',
       addDream: (dream) => set((state) => ({ 
         dreams: [dream, ...state.dreams] 
       })),
@@ -100,12 +81,12 @@ export const useDreamStore = create<DreamState>()(
       setSortBy: (sortBy) => set({ sortBy }),
       getSortedDreams: () => {
         const { dreams, sortBy } = get();
-        return sortDreams(dreams, sortBy);
+        return filterAndSortDreams(dreams, sortBy);
       },
       getGroupedDreams: () => {
         const { dreams, sortBy } = get();
-        const sortedDreams = sortDreams(dreams, sortBy);
-        return groupDreams(sortedDreams, sortBy);
+        const filteredDreams = filterAndSortDreams(dreams, sortBy);
+        return groupDreams(filteredDreams, sortBy);
       },
     }),
     {

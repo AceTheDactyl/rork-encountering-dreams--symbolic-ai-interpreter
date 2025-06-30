@@ -20,6 +20,10 @@ export default function SortModal({ visible, onClose }: SortModalProps) {
     setSortBy(option);
     onClose();
   };
+
+  // Group options for better organization
+  const groupingOptions = sortOptions.filter(opt => ['type', 'persona'].includes(opt.id));
+  const filterOptions = sortOptions.filter(opt => ['mnemonic', 'psychic', 'pre-echo', 'lucid', 'meta-lucid'].includes(opt.id));
   
   return (
     <Modal
@@ -31,49 +35,88 @@ export default function SortModal({ visible, onClose }: SortModalProps) {
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.header}>
           <View style={styles.headerContent}>
-            <Text style={styles.title}>Sort Dreams</Text>
+            <Text style={styles.title}>Sort & Filter Dreams</Text>
             <Pressable style={styles.closeButton} onPress={onClose}>
               <X size={24} color={Colors.dark.text} />
             </Pressable>
           </View>
           <Text style={styles.subtitle}>
-            Currently sorting by: {currentSort?.label}
+            Currently: {currentSort?.label}
           </Text>
         </View>
         
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {sortOptions.map((option) => (
-            <Pressable
-              key={option.id}
-              style={[
-                styles.optionCard,
-                sortBy === option.id && styles.selectedOption
-              ]}
-              onPress={() => handleSortSelect(option.id)}
-            >
-              <View style={styles.optionContent}>
-                <View style={styles.optionLeft}>
-                  <Text style={styles.optionIcon}>{option.icon}</Text>
-                  <View style={styles.optionText}>
-                    <Text style={[
-                      styles.optionLabel,
-                      sortBy === option.id && styles.selectedText
-                    ]}>
-                      {option.label}
-                    </Text>
-                    <Text style={styles.optionDescription}>
-                      {option.description}
-                    </Text>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Group Dreams</Text>
+            {groupingOptions.map((option) => (
+              <Pressable
+                key={option.id}
+                style={[
+                  styles.optionCard,
+                  sortBy === option.id && styles.selectedOption
+                ]}
+                onPress={() => handleSortSelect(option.id)}
+              >
+                <View style={styles.optionContent}>
+                  <View style={styles.optionLeft}>
+                    <Text style={styles.optionIcon}>{option.icon}</Text>
+                    <View style={styles.optionText}>
+                      <Text style={[
+                        styles.optionLabel,
+                        sortBy === option.id && styles.selectedText
+                      ]}>
+                        {option.label}
+                      </Text>
+                      <Text style={styles.optionDescription}>
+                        {option.description}
+                      </Text>
+                    </View>
                   </View>
+                  {sortBy === option.id && (
+                    <View style={styles.checkmark}>
+                      <Text style={styles.checkmarkText}>✓</Text>
+                    </View>
+                  )}
                 </View>
-                {sortBy === option.id && (
-                  <View style={styles.checkmark}>
-                    <Text style={styles.checkmarkText}>✓</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Filter by Dream Type</Text>
+            {filterOptions.map((option) => (
+              <Pressable
+                key={option.id}
+                style={[
+                  styles.optionCard,
+                  sortBy === option.id && styles.selectedOption
+                ]}
+                onPress={() => handleSortSelect(option.id)}
+              >
+                <View style={styles.optionContent}>
+                  <View style={styles.optionLeft}>
+                    <Text style={styles.optionIcon}>{option.icon}</Text>
+                    <View style={styles.optionText}>
+                      <Text style={[
+                        styles.optionLabel,
+                        sortBy === option.id && styles.selectedText
+                      ]}>
+                        {option.label}
+                      </Text>
+                      <Text style={styles.optionDescription}>
+                        {option.description}
+                      </Text>
+                    </View>
                   </View>
-                )}
-              </View>
-            </Pressable>
-          ))}
+                  {sortBy === option.id && (
+                    <View style={styles.checkmark}>
+                      <Text style={styles.checkmarkText}>✓</Text>
+                    </View>
+                  )}
+                </View>
+              </Pressable>
+            ))}
+          </View>
         </ScrollView>
       </View>
     </Modal>
@@ -112,6 +155,16 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 20,
+  },
+  section: {
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.dark.text,
+    marginBottom: 16,
+    paddingLeft: 4,
   },
   optionCard: {
     backgroundColor: Colors.dark.card,

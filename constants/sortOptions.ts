@@ -9,28 +9,46 @@ export interface SortOptionConfig {
 
 export const sortOptions: SortOptionConfig[] = [
   {
-    id: 'date-desc',
-    label: 'Newest First',
-    description: 'Most recent dreams at the top',
-    icon: '↓'
-  },
-  {
-    id: 'date-asc',
-    label: 'Oldest First',
-    description: 'Earliest dreams at the top',
-    icon: '↑'
-  },
-  {
     id: 'type',
-    label: 'By Dream Type',
-    description: 'Group by dream classification',
+    label: 'Group by Dream Type',
+    description: 'Group dreams by classification',
     icon: '○'
   },
   {
     id: 'persona',
-    label: 'By Persona',
+    label: 'Group by Persona',
     description: 'Group by Orion or Limnus',
     icon: '👤'
+  },
+  {
+    id: 'mnemonic',
+    label: 'Mnemonic Dreams Only',
+    description: 'Show only memory recursion dreams',
+    icon: '🧠'
+  },
+  {
+    id: 'psychic',
+    label: 'Psychic Dreams Only',
+    description: 'Show only emotional integration dreams',
+    icon: '💫'
+  },
+  {
+    id: 'pre-echo',
+    label: 'Pre-Echo Dreams Only',
+    description: 'Show only probability tuning dreams',
+    icon: '🔮'
+  },
+  {
+    id: 'lucid',
+    label: 'Lucid Dreams Only',
+    description: 'Show only symbol control dreams',
+    icon: '✨'
+  },
+  {
+    id: 'meta-lucid',
+    label: 'Meta-Lucid Dreams Only',
+    description: 'Show only architectural interface dreams',
+    icon: '🌀'
   }
 ];
 

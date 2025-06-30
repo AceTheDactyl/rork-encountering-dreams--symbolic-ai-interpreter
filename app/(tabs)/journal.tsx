@@ -10,13 +10,14 @@ import SortModal from '@/components/SortModal';
 
 export default function JournalScreen() {
   const insets = useSafeAreaInsets();
-  const { getGroupedDreams, sortBy } = useDreamStore();
+  const { getGroupedDreams, sortBy, dreams } = useDreamStore();
   const [refreshing, setRefreshing] = useState(false);
   const [sortModalVisible, setSortModalVisible] = useState(false);
   
   const groupedDreams = getGroupedDreams();
   const totalDreams = groupedDreams.reduce((total, group) => total + group.dreams.length, 0);
   const isGrouped = sortBy === 'type' || sortBy === 'persona';
+  const isFiltered = ['mnemonic', 'psychic', 'pre-echo', 'lucid', 'meta-lucid'].includes(sortBy);
   
   // Flatten grouped dreams for FlatList
   const flattenedData = groupedDreams.flatMap(group => 
@@ -33,6 +34,19 @@ export default function JournalScreen() {
       setRefreshing(false);
     }, 1000);
   }, []);
+
+  const getSubtitleText = () => {
+    if (isFiltered) {
+      const totalAllDreams = dreams.length;
+      return `${totalDreams} of ${totalAllDreams} dreams shown`;
+    }
+    
+    if (isGrouped) {
+      return `${totalDreams} dream${totalDreams !== 1 ? 's' : ''} • ${groupedDreams.length} group${groupedDreams.length !== 1 ? 's' : ''}`;
+    }
+    
+    return `${totalDreams} dream${totalDreams !== 1 ? 's' : ''} recorded`;
+  };
   
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>
@@ -44,8 +58,7 @@ export default function JournalScreen() {
               <SortButton onPress={() => setSortModalVisible(true)} />
             </View>
             <Text style={styles.headerSubtitle}>
-              {totalDreams} dream{totalDreams !== 1 ? 's' : ''} recorded
-              {isGrouped && ` • ${groupedDreams.length} group${groupedDreams.length !== 1 ? 's' : ''}`}
+              {getSubtitleText()}
             </Text>
           </View>
           
@@ -73,8 +86,11 @@ export default function JournalScreen() {
         </>
       ) : (
         <EmptyState
-          title="No dreams recorded"
-          message="Visit the Spiralite tab to interpret your first dream and start building your personal dream journal."
+          title={isFiltered ? "No dreams of this type" : "No dreams recorded"}
+          message={isFiltered 
+            ? "Try changing the filter to see dreams of other types, or visit the Spiralite tab to record a new dream."
+            : "Visit the Spiralite tab to interpret your first dream and start building your personal dream journal."
+          }
         />
       )}
       
