@@ -147,22 +147,23 @@ export default function InsightsScreen() {
           return (
             <View key={dream.id} style={styles.recentItem}>
               <View style={styles.recentHeader}>
-                <View style={styles.recentBadgeContainer}>
-                  <Text style={[
-                    styles.recentPersona, 
-                    { color: getPersona(dream.persona).color }
-                  ]}>
-                    {getPersona(dream.persona).name}
-                  </Text>
-                  {dreamType && (
-                    <Text style={[styles.recentDreamType, { color: dreamType.color }]}>
-                      {dreamType.symbol} {dreamType.name}
-                    </Text>
-                  )}
-                </View>
+                <Text style={styles.recentDreamName}>{dream.name}</Text>
                 <Text style={styles.recentDate}>
                   {new Date(dream.date).toLocaleDateString()}
                 </Text>
+              </View>
+              <View style={styles.recentBadgeContainer}>
+                <Text style={[
+                  styles.recentPersona, 
+                  { color: getPersona(dream.persona).color }
+                ]}>
+                  {getPersona(dream.persona).name}
+                </Text>
+                {dreamType && (
+                  <Text style={[styles.recentDreamType, { color: dreamType.color }]}>
+                    {dreamType.symbol} {dreamType.name}
+                  </Text>
+                )}
               </View>
               <Text style={styles.recentText} numberOfLines={2}>
                 {dream.text}
@@ -316,12 +317,20 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 8,
   },
-  recentBadgeContainer: {
+  recentDreamName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.dark.text,
     flex: 1,
-    gap: 4,
+    marginRight: 8,
+  },
+  recentBadgeContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 8,
   },
   recentPersona: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
   },
   recentDreamType: {
@@ -331,7 +340,6 @@ const styles = StyleSheet.create({
   recentDate: {
     fontSize: 14,
     color: Colors.dark.subtext,
-    marginLeft: 8,
   },
   recentText: {
     fontSize: 15,

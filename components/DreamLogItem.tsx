@@ -47,22 +47,25 @@ export default function DreamLogItem({ dream, showGroupHeader, groupTitle }: Dre
       
       <Pressable style={styles.container} onPress={handlePress}>
         <View style={styles.header}>
-          <View style={styles.badgeContainer}>
-            <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
-              <Text style={[styles.personaText, { color: persona.color }]}>
-                {persona.name}
-              </Text>
-            </View>
-            {dreamType && (
-              <View style={[styles.dreamTypeBadge, { backgroundColor: dreamType.color + '33' }]}>
-                <Text style={[styles.dreamTypeSymbol, { color: dreamType.color }]}>
-                  {dreamType.symbol}
-                </Text>
-                <Text style={[styles.dreamTypeText, { color: dreamType.color }]}>
-                  {dreamType.name}
+          <View style={styles.titleContainer}>
+            <Text style={styles.dreamName}>{dream.name}</Text>
+            <View style={styles.badgeContainer}>
+              <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
+                <Text style={[styles.personaText, { color: persona.color }]}>
+                  {persona.name}
                 </Text>
               </View>
-            )}
+              {dreamType && (
+                <View style={[styles.dreamTypeBadge, { backgroundColor: dreamType.color + '33' }]}>
+                  <Text style={[styles.dreamTypeSymbol, { color: dreamType.color }]}>
+                    {dreamType.symbol}
+                  </Text>
+                  <Text style={[styles.dreamTypeText, { color: dreamType.color }]}>
+                    {dreamType.name}
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
           <Text style={styles.date}>{formatDate(dream.date)}</Text>
         </View>
@@ -115,15 +118,26 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 12,
   },
-  badgeContainer: {
+  titleContainer: {
     flex: 1,
+    marginRight: 12,
+  },
+  dreamName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.dark.text,
+    marginBottom: 8,
+    lineHeight: 22,
+  },
+  badgeContainer: {
+    flexDirection: 'row',
     gap: 8,
+    flexWrap: 'wrap',
   },
   personaBadge: {
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 16,
-    alignSelf: 'flex-start',
   },
   personaText: {
     fontSize: 14,
@@ -135,7 +149,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
-    alignSelf: 'flex-start',
   },
   dreamTypeSymbol: {
     fontSize: 12,
@@ -149,7 +162,7 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 14,
     color: Colors.dark.subtext,
-    marginLeft: 8,
+    textAlign: 'right',
   },
   dreamText: {
     fontSize: 16,

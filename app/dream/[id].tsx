@@ -49,8 +49,10 @@ export default function DreamDetailScreen() {
   const handleShare = async () => {
     try {
       await Share.share({
-        title: `Dream interpreted by ${persona.name}`,
-        message: `My Dream (${dreamType?.name || 'Unknown Type'}):
+        title: dream.name,
+        message: `${dream.name}
+
+My Dream (${dreamType?.name || 'Unknown Type'}):
 
 ${dream.text}
 
@@ -83,6 +85,7 @@ Interpreted on ${formatDate(dream.date)}`,
       ]}
     >
       <View style={styles.header}>
+        <Text style={styles.dreamTitle}>{dream.name}</Text>
         <View style={styles.metaContainer}>
           <View style={styles.badgeContainer}>
             <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
@@ -178,6 +181,13 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 24,
   },
+  dreamTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: Colors.dark.text,
+    marginBottom: 16,
+    lineHeight: 30,
+  },
   metaContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -185,13 +195,14 @@ const styles = StyleSheet.create({
   },
   badgeContainer: {
     flex: 1,
+    flexDirection: 'row',
     gap: 8,
+    flexWrap: 'wrap',
   },
   personaBadge: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    alignSelf: 'flex-start',
   },
   personaText: {
     fontSize: 16,
@@ -203,7 +214,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    alignSelf: 'flex-start',
   },
   dreamTypeSymbol: {
     fontSize: 14,
@@ -218,6 +228,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.dark.subtext,
     marginLeft: 16,
+    textAlign: 'right',
   },
   dreamTypeInfoContainer: {
     backgroundColor: Colors.dark.card,

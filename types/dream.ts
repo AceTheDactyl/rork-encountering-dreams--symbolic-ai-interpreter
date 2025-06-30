@@ -1,5 +1,6 @@
 export interface Dream {
   id: string;
+  name: string;
   text: string;
   persona: 'orion' | 'limnus';
   interpretation: string;

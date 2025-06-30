@@ -10,6 +10,7 @@ interface AIResponse {
 }
 
 interface ParsedInterpretation {
+  name: string;
   dreamType: string;
   interpretation: string;
 }
@@ -22,11 +23,21 @@ export class InterpretationService {
       const messages: AIMessage[] = [
         {
           role: 'system',
-          content: persona.systemPrompt
+          content: `${persona.systemPrompt}
+
+IMPORTANT: Your response must include these three sections in this exact format:
+
+DREAM_NAME: [A poetic, evocative title for this dream in 2-6 words that captures its essence]
+
+DREAM_TYPE: [One of: mnemonic, psychic, pre-echo, lucid, meta-lucid]
+
+INTERPRETATION: [Your full interpretation of the dream]
+
+The dream name should be memorable and capture the core imagery or emotion of the dream. Examples: "The Floating Library", "Chasing Shadows Home", "Mirror of Lost Time", "The Singing Forest".`
         },
         {
           role: 'user',
-          content: `Please interpret this dream: ${dreamText}`
+          content: `Please interpret this dream and provide a name for it: ${dreamText}`
         }
       ];
 
@@ -43,16 +54,33 @@ export class InterpretationService {
       }
 
       const data: AIResponse = await response.json();
-      return this.parseInterpretation(data.completion);
+      return this.parseInterpretation(data.completion, dreamText);
     } catch (error) {
       console.error('Interpretation service error:', error);
       throw new Error('Unable to retrieve interpretation. Please check your internet connection and try again.');
     }
   }
 
-  private static parseInterpretation(rawResponse: string): ParsedInterpretation {
+  private static parseInterpretation(rawResponse: string, dreamText: string): ParsedInterpretation {
     try {
-      // Extract dream type - look for the exact format from the system prompt
+      // Extract dream name
+      const nameMatch = rawResponse.match(/DREAM_NAME:\s*([^\n\r]+)/i);
+      let name = 'Untitled Dream';
+      
+      if (nameMatch) {
+        name = nameMatch[1].trim();
+        // Remove quotes if present
+        name = name.replace(/^["']|["']$/g, '');
+      } else {
+        // Fallback: generate name from first few words of dream
+        const words = dreamText.trim().split(/\s+/).slice(0, 4);
+        name = words.join(' ');
+        if (dreamText.length > name.length) {
+          name += '...';
+        }
+      }
+      
+      // Extract dream type
       const dreamTypeMatch = rawResponse.match(/DREAM_TYPE:\s*([^\n\r]+)/i);
       let dreamType = 'psychic'; // default fallback
       
@@ -72,21 +100,25 @@ export class InterpretationService {
       if (interpretationMatch) {
         interpretation = interpretationMatch[1].trim();
       } else {
-        // If no INTERPRETATION: section found, try to remove the DREAM_TYPE and CLASSIFICATION_REASON parts
+        // If no INTERPRETATION: section found, try to remove the other parts
         interpretation = rawResponse
+          .replace(/DREAM_NAME:\s*[^\n\r]+/i, '')
           .replace(/DREAM_TYPE:\s*[^\n\r]+/i, '')
           .replace(/CLASSIFICATION_REASON:\s*[^\n\r]+/i, '')
           .trim();
       }
       
       return {
+        name,
         dreamType,
         interpretation
       };
     } catch (error) {
       console.error('Error parsing interpretation:', error);
-      // Fallback: return the raw response as interpretation with default type
+      // Fallback: return basic values
+      const fallbackName = dreamText.trim().split(/\s+/).slice(0, 4).join(' ') + '...';
       return {
+        name: fallbackName,
         dreamType: 'psychic',
         interpretation: rawResponse
       };

@@ -42,6 +42,7 @@ export default function InterpreterScreen() {
       
       const newDream = {
         id: Date.now().toString(),
+        name: result.name,
         text: dreamText.trim(),
         persona: selectedPersona,
         interpretation: result.interpretation,
