@@ -1,37 +1,15 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, Alert } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Download } from 'lucide-react-native';
 import { useDreamStore } from '@/store/dreamStore';
 import { getPersona } from '@/constants/personas';
 import { getDreamType, dreamTypes } from '@/constants/dreamTypes';
-import { ExportService } from '@/services/exportService';
 import Colors from '@/constants/colors';
 import EmptyState from '@/components/EmptyState';
-import Button from '@/components/Button';
 
 export default function InsightsScreen() {
   const insets = useSafeAreaInsets();
   const { dreams } = useDreamStore();
-  const [isExporting, setIsExporting] = useState(false);
-  
-  const handleExportAll = async () => {
-    if (dreams.length === 0) {
-      Alert.alert('No Dreams', 'You need to record some dreams before exporting.');
-      return;
-    }
-
-    setIsExporting(true);
-    try {
-      await ExportService.exportDreamsToDocx(dreams, 'my-dream-journal');
-      Alert.alert('Success', 'Your dreams have been exported successfully!');
-    } catch (error) {
-      console.error('Export error:', error);
-      Alert.alert('Export Failed', 'Unable to export dreams. Please try again.');
-    } finally {
-      setIsExporting(false);
-    }
-  };
   
   if (dreams.length === 0) {
     return (
@@ -67,23 +45,10 @@ export default function InsightsScreen() {
       ]}
     >
       <View style={styles.headerContainer}>
-        <View style={styles.headerTop}>
-          <View style={styles.headerText}>
-            <Text style={styles.title}>Dream Insights</Text>
-            <Text style={styles.subtitle}>
-              Patterns from your interpretation journey
-            </Text>
-          </View>
-          <Button
-            label="Export"
-            onPress={handleExportAll}
-            variant="outline"
-            size="small"
-            isLoading={isExporting}
-            icon={<Download size={16} color={Colors.dark.primary} />}
-            style={styles.exportButton}
-          />
-        </View>
+        <Text style={styles.title}>Dream Insights</Text>
+        <Text style={styles.subtitle}>
+          Patterns from your interpretation journey
+        </Text>
       </View>
       
       <View style={styles.statsContainer}>
@@ -229,15 +194,6 @@ const styles = StyleSheet.create({
   headerContainer: {
     marginBottom: 24,
   },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  headerText: {
-    flex: 1,
-    marginRight: 16,
-  },
   title: {
     fontSize: 28,
     fontWeight: '700',
@@ -247,10 +203,6 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: Colors.dark.subtext,
-  },
-  exportButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
   },
   statsContainer: {
     flexDirection: 'row',
