@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, Pressable, Share, Linking, Alert } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Pressable, Share } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Share2, Trash2, MessageSquare } from 'lucide-react-native';
-import * as Clipboard from 'expo-clipboard';
+import { Share2, Trash2 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useDreamStore } from '@/store/dreamStore';
 import { getPersona } from '@/constants/personas';
@@ -65,53 +64,6 @@ Interpreted on ${formatDate(dream.date)}`,
       });
     } catch (error) {
       console.error(error);
-    }
-  };
-  
-  const handleDiscordShare = async () => {
-    try {
-      // Format message for Discord with markdown
-      const discordMessage = `**${dream.name}** 🌙
-
-**My Dream** (${dreamType?.name || 'Unknown Type'}):
-\`\`\`
-${dream.text}
-\`\`\`
-
-**${persona.name}'s Interpretation:**
-> ${dream.interpretation}
-
-*Interpreted on ${formatDate(dream.date)}*`;
-
-      // Try to open Discord app first
-      const discordAppUrl = `discord://`;
-      const canOpenDiscord = await Linking.canOpenURL(discordAppUrl);
-      
-      if (canOpenDiscord) {
-        // Copy to clipboard and open Discord
-        await Clipboard.setStringAsync(discordMessage);
-        await Linking.openURL(discordAppUrl);
-        Alert.alert(
-          'Copied to Clipboard!',
-          'Your dream interpretation has been copied to your clipboard. You can now paste it in Discord.',
-          [{ text: 'OK' }]
-        );
-      } else {
-        // Fallback: just copy to clipboard
-        await Clipboard.setStringAsync(discordMessage);
-        Alert.alert(
-          'Copied to Clipboard!',
-          'Your dream interpretation has been copied to your clipboard. Open Discord and paste it wherever you\'d like to share it.',
-          [{ text: 'OK' }]
-        );
-      }
-    } catch (error) {
-      console.error('Discord share error:', error);
-      Alert.alert(
-        'Share Failed',
-        'Unable to share to Discord. Please try again.',
-        [{ text: 'OK' }]
-      );
     }
   };
   
@@ -193,23 +145,13 @@ ${dream.text}
       </View>
       
       <View style={styles.actionsContainer}>
-        <View style={styles.shareButtonsContainer}>
-          <Button
-            label="Share"
-            onPress={handleShare}
-            variant="outline"
-            style={styles.shareButton}
-            icon={<Share2 size={18} color={Colors.dark.primary} />}
-          />
-          
-          <Button
-            label="Discord"
-            onPress={handleDiscordShare}
-            variant="secondary"
-            style={styles.discordButton}
-            icon={<MessageSquare size={18} color={Colors.dark.text} />}
-          />
-        </View>
+        <Button
+          label="Share Interpretation"
+          onPress={handleShare}
+          variant="outline"
+          style={styles.shareButton}
+          icon={<Share2 size={20} color={Colors.dark.primary} style={{ marginRight: 8 }} />}
+        />
         
         <Pressable 
           style={[styles.deleteButton, showDeleteConfirm && styles.deleteConfirmButton]} 
@@ -353,17 +295,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 16,
   },
-  shareButtonsContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    gap: 12,
-    marginRight: 16,
-  },
   shareButton: {
     flex: 1,
-  },
-  discordButton: {
-    flex: 1,
+    marginRight: 16,
   },
   deleteButton: {
     width: 48,
