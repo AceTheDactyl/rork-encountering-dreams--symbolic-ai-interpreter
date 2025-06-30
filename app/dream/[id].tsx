@@ -6,6 +6,7 @@ import { Share2, Trash2 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useDreamStore } from '@/store/dreamStore';
 import { getPersona } from '@/constants/personas';
+import { getDreamType } from '@/constants/dreamTypes';
 import Button from '@/components/Button';
 
 export default function DreamDetailScreen() {
@@ -31,6 +32,7 @@ export default function DreamDetailScreen() {
   }
   
   const persona = getPersona(dream.persona);
+  const dreamType = getDreamType(dream.dreamType);
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -48,7 +50,7 @@ export default function DreamDetailScreen() {
     try {
       await Share.share({
         title: `Dream interpreted by ${persona.name}`,
-        message: `My Dream:
+        message: `My Dream (${dreamType?.name || 'Unknown Type'}):
 
 ${dream.text}
 
@@ -82,14 +84,50 @@ Interpreted on ${formatDate(dream.date)}`,
     >
       <View style={styles.header}>
         <View style={styles.metaContainer}>
-          <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
-            <Text style={[styles.personaText, { color: persona.color }]}>
-              {persona.name}
-            </Text>
+          <View style={styles.badgeContainer}>
+            <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
+              <Text style={[styles.personaText, { color: persona.color }]}>
+                {persona.name}
+              </Text>
+            </View>
+            {dreamType && (
+              <View style={[styles.dreamTypeBadge, { backgroundColor: dreamType.color + '33' }]}>
+                <Text style={[styles.dreamTypeSymbol, { color: dreamType.color }]}>
+                  {dreamType.symbol}
+                </Text>
+                <Text style={[styles.dreamTypeText, { color: dreamType.color }]}>
+                  {dreamType.name}
+                </Text>
+              </View>
+            )}
           </View>
           <Text style={styles.date}>{formatDate(dream.date)}</Text>
         </View>
       </View>
+      
+      {dreamType && (
+        <View style={styles.dreamTypeInfoContainer}>
+          <Text style={styles.dreamTypeInfoTitle}>Dream Classification</Text>
+          <View style={styles.dreamTypeInfoGrid}>
+            <View style={styles.dreamTypeInfoItem}>
+              <Text style={styles.dreamTypeInfoLabel}>Time Index:</Text>
+              <Text style={styles.dreamTypeInfoValue}>{dreamType.timeIndex}</Text>
+            </View>
+            <View style={styles.dreamTypeInfoItem}>
+              <Text style={styles.dreamTypeInfoLabel}>Function:</Text>
+              <Text style={styles.dreamTypeInfoValue}>{dreamType.primaryFunction}</Text>
+            </View>
+            <View style={styles.dreamTypeInfoItem}>
+              <Text style={styles.dreamTypeInfoLabel}>Symbolic Field:</Text>
+              <Text style={styles.dreamTypeInfoValue}>{dreamType.symbolicField}</Text>
+            </View>
+            <View style={styles.dreamTypeInfoItem}>
+              <Text style={styles.dreamTypeInfoLabel}>Phenomena:</Text>
+              <Text style={styles.dreamTypeInfoValue}>{dreamType.typicalPhenomena}</Text>
+            </View>
+          </View>
+        </View>
+      )}
       
       <View style={styles.dreamContainer}>
         <Text style={styles.sectionTitle}>Your Dream</Text>
@@ -143,20 +181,74 @@ const styles = StyleSheet.create({
   metaContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+  },
+  badgeContainer: {
+    flex: 1,
+    gap: 8,
   },
   personaBadge: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
+    alignSelf: 'flex-start',
   },
   personaText: {
     fontSize: 16,
     fontWeight: '600',
   },
+  dreamTypeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    alignSelf: 'flex-start',
+  },
+  dreamTypeSymbol: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginRight: 8,
+  },
+  dreamTypeText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
   date: {
     fontSize: 14,
     color: Colors.dark.subtext,
+    marginLeft: 16,
+  },
+  dreamTypeInfoContainer: {
+    backgroundColor: Colors.dark.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+  },
+  dreamTypeInfoTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.dark.text,
+    marginBottom: 12,
+  },
+  dreamTypeInfoGrid: {
+    gap: 8,
+  },
+  dreamTypeInfoItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  dreamTypeInfoLabel: {
+    fontSize: 14,
+    color: Colors.dark.subtext,
+    flex: 1,
+  },
+  dreamTypeInfoValue: {
+    fontSize: 14,
+    color: Colors.dark.text,
+    flex: 2,
+    textAlign: 'right',
   },
   dreamContainer: {
     backgroundColor: Colors.dark.card,

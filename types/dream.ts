@@ -3,6 +3,7 @@ export interface Dream {
   text: string;
   persona: 'orion' | 'limnus';
   interpretation: string;
+  dreamType: string;
   date: string;
 }
 

@@ -38,13 +38,14 @@ export default function InterpreterScreen() {
     
     try {
       const persona = getPersona(selectedPersona);
-      const interpretation = await InterpretationService.interpretDream(dreamText.trim(), persona);
+      const result = await InterpretationService.interpretDream(dreamText.trim(), persona);
       
       const newDream = {
         id: Date.now().toString(),
         text: dreamText.trim(),
         persona: selectedPersona,
-        interpretation,
+        interpretation: result.interpretation,
+        dreamType: result.dreamType,
         date: new Date().toISOString(),
       };
       
