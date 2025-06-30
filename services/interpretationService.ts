@@ -52,13 +52,32 @@ export class InterpretationService {
 
   private static parseInterpretation(rawResponse: string): ParsedInterpretation {
     try {
-      // Extract dream type
-      const dreamTypeMatch = rawResponse.match(/DREAM_TYPE:\s*([^\n]+)/i);
-      const dreamType = dreamTypeMatch ? dreamTypeMatch[1].trim() : 'psychic'; // default fallback
+      // Extract dream type - look for the exact format from the system prompt
+      const dreamTypeMatch = rawResponse.match(/DREAM_TYPE:\s*([^\n\r]+)/i);
+      let dreamType = 'psychic'; // default fallback
+      
+      if (dreamTypeMatch) {
+        const extractedType = dreamTypeMatch[1].trim().toLowerCase();
+        // Validate against known dream types
+        const validTypes = ['mnemonic', 'psychic', 'pre-echo', 'lucid', 'meta-lucid'];
+        if (validTypes.includes(extractedType)) {
+          dreamType = extractedType;
+        }
+      }
       
       // Extract interpretation (everything after "INTERPRETATION:")
       const interpretationMatch = rawResponse.match(/INTERPRETATION:\s*([\s\S]*)/i);
-      const interpretation = interpretationMatch ? interpretationMatch[1].trim() : rawResponse;
+      let interpretation = rawResponse;
+      
+      if (interpretationMatch) {
+        interpretation = interpretationMatch[1].trim();
+      } else {
+        // If no INTERPRETATION: section found, try to remove the DREAM_TYPE and CLASSIFICATION_REASON parts
+        interpretation = rawResponse
+          .replace(/DREAM_TYPE:\s*[^\n\r]+/i, '')
+          .replace(/CLASSIFICATION_REASON:\s*[^\n\r]+/i, '')
+          .trim();
+      }
       
       return {
         dreamType,

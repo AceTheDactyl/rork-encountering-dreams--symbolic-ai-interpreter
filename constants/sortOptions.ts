@@ -31,18 +31,6 @@ export const sortOptions: SortOptionConfig[] = [
     label: 'By Persona',
     description: 'Group by Orion or Limnus',
     icon: '👤'
-  },
-  {
-    id: 'length-desc',
-    label: 'Longest First',
-    description: 'Dreams with most text first',
-    icon: '📝'
-  },
-  {
-    id: 'length-asc',
-    label: 'Shortest First',
-    description: 'Dreams with least text first',
-    icon: '📄'
   }
 ];
 

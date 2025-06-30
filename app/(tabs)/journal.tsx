@@ -10,11 +10,22 @@ import SortModal from '@/components/SortModal';
 
 export default function JournalScreen() {
   const insets = useSafeAreaInsets();
-  const { getSortedDreams } = useDreamStore();
+  const { getGroupedDreams, sortBy } = useDreamStore();
   const [refreshing, setRefreshing] = useState(false);
   const [sortModalVisible, setSortModalVisible] = useState(false);
   
-  const sortedDreams = getSortedDreams();
+  const groupedDreams = getGroupedDreams();
+  const totalDreams = groupedDreams.reduce((total, group) => total + group.dreams.length, 0);
+  const isGrouped = sortBy === 'type' || sortBy === 'persona';
+  
+  // Flatten grouped dreams for FlatList
+  const flattenedData = groupedDreams.flatMap(group => 
+    group.dreams.map((dream, index) => ({
+      ...dream,
+      showGroupHeader: index === 0 && isGrouped,
+      groupTitle: group.groupTitle
+    }))
+  );
   
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -25,7 +36,7 @@ export default function JournalScreen() {
   
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>
-      {sortedDreams.length > 0 ? (
+      {totalDreams > 0 ? (
         <>
           <View style={styles.header}>
             <View style={styles.headerContent}>
@@ -33,13 +44,20 @@ export default function JournalScreen() {
               <SortButton onPress={() => setSortModalVisible(true)} />
             </View>
             <Text style={styles.headerSubtitle}>
-              {sortedDreams.length} dream{sortedDreams.length !== 1 ? 's' : ''} recorded
+              {totalDreams} dream{totalDreams !== 1 ? 's' : ''} recorded
+              {isGrouped && ` • ${groupedDreams.length} group${groupedDreams.length !== 1 ? 's' : ''}`}
             </Text>
           </View>
           
           <FlatList
-            data={sortedDreams}
-            renderItem={({ item }) => <DreamLogItem dream={item} />}
+            data={flattenedData}
+            renderItem={({ item }) => (
+              <DreamLogItem 
+                dream={item} 
+                showGroupHeader={item.showGroupHeader}
+                groupTitle={item.groupTitle}
+              />
+            )}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}

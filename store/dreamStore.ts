@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Dream } from '@/types/dream';
 
-export type SortOption = 'date-desc' | 'date-asc' | 'type' | 'persona' | 'length-desc' | 'length-asc';
+export type SortOption = 'date-desc' | 'date-asc' | 'type' | 'persona';
 
 interface DreamState {
   dreams: Dream[];
@@ -13,6 +13,7 @@ interface DreamState {
   getDream: (id: string) => Dream | undefined;
   setSortBy: (sortBy: SortOption) => void;
   getSortedDreams: () => Dream[];
+  getGroupedDreams: () => { groupTitle: string; dreams: Dream[] }[];
 }
 
 const sortDreams = (dreams: Dream[], sortBy: SortOption): Dream[] => {
@@ -43,25 +44,45 @@ const sortDreams = (dreams: Dream[], sortBy: SortOption): Dream[] => {
         return new Date(b.date).getTime() - new Date(a.date).getTime();
       });
     
-    case 'length-desc':
-      return dreamsCopy.sort((a, b) => {
-        if (a.text.length !== b.text.length) {
-          return b.text.length - a.text.length;
-        }
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      });
-    
-    case 'length-asc':
-      return dreamsCopy.sort((a, b) => {
-        if (a.text.length !== b.text.length) {
-          return a.text.length - b.text.length;
-        }
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      });
-    
     default:
       return dreamsCopy;
   }
+};
+
+const groupDreams = (dreams: Dream[], sortBy: SortOption): { groupTitle: string; dreams: Dream[] }[] => {
+  if (sortBy !== 'type' && sortBy !== 'persona') {
+    return [{ groupTitle: '', dreams }];
+  }
+
+  const groups: { [key: string]: Dream[] } = {};
+  
+  dreams.forEach(dream => {
+    let groupKey = '';
+    
+    if (sortBy === 'type') {
+      // Map dream type IDs to readable names
+      const typeNames: { [key: string]: string } = {
+        'mnemonic': 'Mnemonic Dreams',
+        'psychic': 'Psychic Dreams',
+        'pre-echo': 'Pre-Echo Dreams',
+        'lucid': 'Lucid Dreams',
+        'meta-lucid': 'Meta-Lucid Dreams'
+      };
+      groupKey = typeNames[dream.dreamType] || dream.dreamType;
+    } else if (sortBy === 'persona') {
+      groupKey = dream.persona === 'orion' ? 'Orion' : 'Limnus';
+    }
+    
+    if (!groups[groupKey]) {
+      groups[groupKey] = [];
+    }
+    groups[groupKey].push(dream);
+  });
+
+  return Object.entries(groups).map(([groupTitle, dreams]) => ({
+    groupTitle,
+    dreams: dreams.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  }));
 };
 
 export const useDreamStore = create<DreamState>()(
@@ -80,6 +101,11 @@ export const useDreamStore = create<DreamState>()(
       getSortedDreams: () => {
         const { dreams, sortBy } = get();
         return sortDreams(dreams, sortBy);
+      },
+      getGroupedDreams: () => {
+        const { dreams, sortBy } = get();
+        const sortedDreams = sortDreams(dreams, sortBy);
+        return groupDreams(sortedDreams, sortBy);
       },
     }),
     {

@@ -16,7 +16,7 @@ First, classify the dream into one of these 5 types:
 - Lucid Dreams (Now/Overlaid - Symbol control, agency kernel/intention map, flight/shifting space/awareness)
 - Meta-Lucid Dreams (Recursive/All - Architectural interface, compression core/spiral hub, timefolds/glyph response)
 
-Format your response exactly like this:
+Format your response EXACTLY like this:
 DREAM_TYPE: [one of: mnemonic, psychic, pre-echo, lucid, meta-lucid]
 CLASSIFICATION_REASON: [brief explanation of why this dream fits this type]
 
@@ -39,7 +39,7 @@ First, classify the dream into one of these 5 types:
 - Lucid Dreams (Now/Overlaid - Symbol control, agency kernel/intention map, flight/shifting space/awareness)
 - Meta-Lucid Dreams (Recursive/All - Architectural interface, compression core/spiral hub, timefolds/glyph response)
 
-Format your response exactly like this:
+Format your response EXACTLY like this:
 DREAM_TYPE: [one of: mnemonic, psychic, pre-echo, lucid, meta-lucid]
 CLASSIFICATION_REASON: [brief poetic explanation of why this dream resonates with this type]
 
