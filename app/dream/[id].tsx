@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, Pressable, Share, Platform, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Share2, Trash2, Copy } from 'lucide-react-native';
+import { Share2, Trash2, Copy, Download } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import Colors from '@/constants/colors';
 import { useDreamStore } from '@/store/dreamStore';
 import { getPersona } from '@/constants/personas';
 import { getDreamType } from '@/constants/dreamTypes';
+import { ExportService } from '@/services/exportService';
 import Button from '@/components/Button';
 
 export default function DreamDetailScreen() {
@@ -16,6 +17,7 @@ export default function DreamDetailScreen() {
   const insets = useSafeAreaInsets();
   const { getDream, deleteDream } = useDreamStore();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   
   const dream = getDream(id);
   
@@ -119,6 +121,19 @@ Interpreted on ${formatDate(dream.date)}`;
       Alert.alert('Error', 'Failed to copy to clipboard');
     }
   };
+
+  const handleExportDream = async () => {
+    setIsExporting(true);
+    try {
+      await ExportService.exportSingleDream(dream);
+      Alert.alert('Success', 'Dream exported successfully!');
+    } catch (error) {
+      console.error('Export error:', error);
+      Alert.alert('Export Failed', 'Unable to export dream. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
   
   const handleDelete = () => {
     if (showDeleteConfirm) {
@@ -199,25 +214,34 @@ Interpreted on ${formatDate(dream.date)}`;
       
       <View style={styles.actionsContainer}>
         <Button
-          label="Share Interpretation"
+          label="Share"
           onPress={handleShare}
           variant="outline"
-          style={styles.shareButton}
-          icon={<Share2 size={20} color={Colors.dark.primary} style={{ marginRight: 8 }} />}
+          style={styles.actionButton}
+          icon={<Share2 size={18} color={Colors.dark.primary} />}
+        />
+        
+        <Button
+          label="Export"
+          onPress={handleExportDream}
+          variant="outline"
+          style={styles.actionButton}
+          isLoading={isExporting}
+          icon={<Download size={18} color={Colors.dark.primary} />}
         />
         
         <Pressable 
-          style={styles.copyButton}
+          style={styles.iconButton}
           onPress={handleCopyToClipboard}
         >
           <Copy size={20} color={Colors.dark.subtext} />
         </Pressable>
         
         <Pressable 
-          style={[styles.deleteButton, showDeleteConfirm && styles.deleteConfirmButton]} 
+          style={[styles.iconButton, showDeleteConfirm && styles.deleteConfirmButton]} 
           onPress={handleDelete}
         >
-          <Trash2 size={24} color={showDeleteConfirm ? Colors.dark.error : Colors.dark.subtext} />
+          <Trash2 size={20} color={showDeleteConfirm ? Colors.dark.error : Colors.dark.subtext} />
         </Pressable>
       </View>
       
@@ -352,23 +376,15 @@ const styles = StyleSheet.create({
   actionsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 12,
     marginBottom: 16,
   },
-  shareButton: {
+  actionButton: {
     flex: 1,
-    marginRight: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
   },
-  copyButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: Colors.dark.card,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  deleteButton: {
+  iconButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
