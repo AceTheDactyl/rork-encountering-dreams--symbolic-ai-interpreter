@@ -1,25 +1,15 @@
 export interface Dream {
   id: string;
-  title: string;
-  content: string;
+  text: string;
+  persona: 'orion' | 'limnus';
+  interpretation: string;
   date: string;
-  mood: string;
-  symbols: string[];
-  themes: string[];
-  isLucid: boolean;
-  isRecurring: boolean;
-  interpretation?: string;
-  patterns?: string[];
 }
 
-export interface DreamSymbol {
-  symbol: string;
+export interface Persona {
+  id: 'orion' | 'limnus';
   name: string;
-  meaning: string;
-}
-
-export interface DreamTheme {
-  id: string;
-  name: string;
-  symbol: string;
+  description: string;
+  color: string;
+  systemPrompt: string;
 }

@@ -6,7 +6,6 @@ import { Dream } from '@/types/dream';
 interface DreamState {
   dreams: Dream[];
   addDream: (dream: Dream) => void;
-  updateDream: (id: string, dream: Partial<Dream>) => void;
   deleteDream: (id: string) => void;
   getDream: (id: string) => Dream | undefined;
 }
@@ -18,18 +17,13 @@ export const useDreamStore = create<DreamState>()(
       addDream: (dream) => set((state) => ({ 
         dreams: [dream, ...state.dreams] 
       })),
-      updateDream: (id, updatedDream) => set((state) => ({
-        dreams: state.dreams.map((dream) => 
-          dream.id === id ? { ...dream, ...updatedDream } : dream
-        )
-      })),
       deleteDream: (id) => set((state) => ({
         dreams: state.dreams.filter((dream) => dream.id !== id)
       })),
       getDream: (id) => get().dreams.find((dream) => dream.id === id),
     }),
     {
-      name: 'dream-storage',
+      name: 'spiralite-dreams',
       storage: createJSONStorage(() => AsyncStorage),
     }
   )

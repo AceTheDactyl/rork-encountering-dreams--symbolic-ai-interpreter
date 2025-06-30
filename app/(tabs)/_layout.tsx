@@ -1,6 +1,6 @@
 import React from "react";
 import { Tabs } from "expo-router";
-import { BookOpen, Home, Moon, Sparkles } from "lucide-react-native";
+import { Brain, BookOpen, Sparkles } from "lucide-react-native";
 import Colors from "@/constants/colors";
 
 export default function TabLayout() {
@@ -25,22 +25,22 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          title: "Spiralite",
+          tabBarIcon: ({ color }) => <Brain size={24} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="journal"
+        options={{
           title: "Journal",
           tabBarIcon: ({ color }) => <BookOpen size={24} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="patterns"
+        name="insights"
         options={{
-          title: "Patterns",
+          title: "Insights",
           tabBarIcon: ({ color }) => <Sparkles size={24} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="symbols"
-        options={{
-          title: "Symbols",
-          tabBarIcon: ({ color }) => <Moon size={24} color={color} />,
         }}
       />
     </Tabs>

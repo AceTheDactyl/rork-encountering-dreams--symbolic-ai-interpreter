@@ -70,20 +70,6 @@ function RootLayoutNav() {
               presentation: "card",
             }} 
           />
-          <Stack.Screen 
-            name="new-dream" 
-            options={{ 
-              title: "New Dream",
-              presentation: "modal",
-            }} 
-          />
-          <Stack.Screen 
-            name="analysis" 
-            options={{ 
-              title: "Dream Analysis",
-              presentation: "card",
-            }} 
-          />
         </Stack>
       </QueryClientProvider>
     </trpc.Provider>

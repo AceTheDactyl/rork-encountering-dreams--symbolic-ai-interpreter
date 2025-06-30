@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, Pressable, Share } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Share2, Trash2, Edit } from 'lucide-react-native';
+import { Share2, Trash2 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useDreamStore } from '@/store/dreamStore';
-import { dreamThemes } from '@/constants/symbols';
-import { generateBasicInterpretation } from '@/utils/dreamAnalysis';
+import { getPersona } from '@/constants/personas';
 import Button from '@/components/Button';
 
 export default function DreamDetailScreen() {
@@ -31,30 +30,33 @@ export default function DreamDetailScreen() {
     );
   }
   
+  const persona = getPersona(dream.persona);
+  
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
       weekday: 'long',
       month: 'long', 
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
-  };
-  
-  const getThemeNames = () => {
-    return dream.themes
-      .map(themeId => {
-        const theme = dreamThemes.find(t => t.id === themeId);
-        return theme ? `${theme.symbol} ${theme.name}` : '';
-      })
-      .filter(Boolean);
   };
   
   const handleShare = async () => {
     try {
       await Share.share({
-        title: dream.title,
-        message: `Dream: ${dream.title}\n\n${dream.content}\n\nRecorded on ${formatDate(dream.date)}`,
+        title: `Dream interpreted by ${persona.name}`,
+        message: `My Dream:
+
+${dream.text}
+
+${persona.name}'s Interpretation:
+
+${dream.interpretation}
+
+Interpreted on ${formatDate(dream.date)}`,
       });
     } catch (error) {
       console.error(error);
@@ -70,14 +72,6 @@ export default function DreamDetailScreen() {
     }
   };
   
-  const handleViewAnalysis = () => {
-    const interpretation = generateBasicInterpretation(dream);
-    router.push({
-      pathname: '/analysis',
-      params: { dreamId: dream.id, interpretation }
-    });
-  };
-  
   return (
     <ScrollView 
       style={styles.container}
@@ -87,74 +81,43 @@ export default function DreamDetailScreen() {
       ]}
     >
       <View style={styles.header}>
-        <Text style={styles.date}>{formatDate(dream.date)}</Text>
-        <Text style={styles.title}>{dream.title}</Text>
-        
-        {dream.mood && (
-          <View style={styles.moodContainer}>
-            <Text style={styles.moodLabel}>Mood:</Text>
-            <Text style={styles.moodText}>{dream.mood}</Text>
+        <View style={styles.metaContainer}>
+          <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
+            <Text style={[styles.personaText, { color: persona.color }]}>
+              {persona.name}
+            </Text>
           </View>
-        )}
-        
-        <View style={styles.badgeContainer}>
-          {dream.isLucid && (
-            <View style={[styles.badge, styles.lucidBadge]}>
-              <Text style={styles.badgeText}>Lucid Dream</Text>
-            </View>
-          )}
-          
-          {dream.isRecurring && (
-            <View style={[styles.badge, styles.recurringBadge]}>
-              <Text style={styles.badgeText}>Recurring Dream</Text>
-            </View>
-          )}
+          <Text style={styles.date}>{formatDate(dream.date)}</Text>
         </View>
       </View>
       
-      <View style={styles.contentBox}>
-        <Text style={styles.contentText}>{dream.content}</Text>
+      <View style={styles.dreamContainer}>
+        <Text style={styles.sectionTitle}>Your Dream</Text>
+        <Text style={styles.dreamText}>{dream.text}</Text>
       </View>
       
-      {(dream.symbols.length > 0 || dream.themes.length > 0) && (
-        <View style={styles.symbolsThemesContainer}>
-          {dream.symbols.length > 0 && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Symbols</Text>
-              <Text style={styles.symbolsText}>{dream.symbols.join(' ')}</Text>
-            </View>
-          )}
-          
-          {dream.themes.length > 0 && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Themes</Text>
-              {getThemeNames().map((theme, index) => (
-                <Text key={index} style={styles.themeItem}>{theme}</Text>
-              ))}
-            </View>
-          )}
-        </View>
-      )}
+      <View style={styles.interpretationContainer}>
+        <Text style={styles.sectionTitle}>
+          {persona.name}'s Interpretation
+        </Text>
+        <Text style={styles.interpretationText}>{dream.interpretation}</Text>
+      </View>
       
       <View style={styles.actionsContainer}>
         <Button
-          label="Analyze Dream"
-          onPress={handleViewAnalysis}
-          style={styles.analyzeButton}
+          label="Share Interpretation"
+          onPress={handleShare}
+          variant="outline"
+          style={styles.shareButton}
+          icon={<Share2 size={20} color={Colors.dark.primary} style={{ marginRight: 8 }} />}
         />
         
-        <View style={styles.iconButtonsContainer}>
-          <Pressable style={styles.iconButton} onPress={handleShare}>
-            <Share2 size={24} color={Colors.dark.text} />
-          </Pressable>
-          
-          <Pressable 
-            style={[styles.iconButton, showDeleteConfirm && styles.deleteConfirmButton]} 
-            onPress={handleDelete}
-          >
-            <Trash2 size={24} color={showDeleteConfirm ? Colors.dark.error : Colors.dark.text} />
-          </Pressable>
-        </View>
+        <Pressable 
+          style={[styles.deleteButton, showDeleteConfirm && styles.deleteConfirmButton]} 
+          onPress={handleDelete}
+        >
+          <Trash2 size={24} color={showDeleteConfirm ? Colors.dark.error : Colors.dark.subtext} />
+        </Pressable>
       </View>
       
       {showDeleteConfirm && (
@@ -177,88 +140,51 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 24,
   },
+  metaContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  personaBadge: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  personaText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
   date: {
     fontSize: 14,
     color: Colors.dark.subtext,
-    marginBottom: 4,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: Colors.dark.text,
-    marginBottom: 12,
-  },
-  moodContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  moodLabel: {
-    fontSize: 16,
-    color: Colors.dark.subtext,
-    marginRight: 8,
-  },
-  moodText: {
-    fontSize: 16,
-    color: Colors.dark.text,
-    fontStyle: 'italic',
-  },
-  badgeContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  badge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  lucidBadge: {
-    backgroundColor: Colors.dark.primary + '33',
-  },
-  recurringBadge: {
-    backgroundColor: Colors.dark.secondary + '33',
-  },
-  badgeText: {
-    fontSize: 14,
-    color: Colors.dark.text,
-    fontWeight: '500',
-  },
-  contentBox: {
+  dreamContainer: {
     backgroundColor: Colors.dark.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 24,
   },
-  contentText: {
-    fontSize: 16,
-    color: Colors.dark.text,
-    lineHeight: 24,
-  },
-  symbolsThemesContainer: {
+  interpretationContainer: {
     backgroundColor: Colors.dark.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 24,
-  },
-  section: {
-    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: Colors.dark.text,
-    marginBottom: 8,
+    marginBottom: 12,
   },
-  symbolsText: {
-    fontSize: 24,
-    color: Colors.dark.primary,
-    letterSpacing: 4,
-  },
-  themeItem: {
+  dreamText: {
     fontSize: 16,
     color: Colors.dark.text,
-    marginBottom: 4,
+    lineHeight: 24,
+  },
+  interpretationText: {
+    fontSize: 16,
+    color: Colors.dark.text,
+    lineHeight: 24,
   },
   actionsContainer: {
     flexDirection: 'row',
@@ -266,21 +192,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 16,
   },
-  analyzeButton: {
+  shareButton: {
     flex: 1,
     marginRight: 16,
   },
-  iconButtonsContainer: {
-    flexDirection: 'row',
-  },
-  iconButton: {
+  deleteButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
     backgroundColor: Colors.dark.card,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 8,
   },
   deleteConfirmButton: {
     backgroundColor: Colors.dark.error + '33',
