@@ -3,8 +3,6 @@ import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDreamStore } from '@/store/dreamStore';
 import { getPersona } from '@/constants/personas';
-import { getDreamTypeInfo, dreamTypeColors } from '@/constants/dreamTypes';
-import { DreamType } from '@/types/dream';
 import Colors from '@/constants/colors';
 import EmptyState from '@/components/EmptyState';
 
@@ -26,20 +24,10 @@ export default function InsightsScreen() {
   const limnusCount = dreams.filter(d => d.persona === 'limnus').length;
   const totalDreams = dreams.length;
   
-  // Dream type statistics
-  const dreamTypeStats = dreams.reduce((acc, dream) => {
-    if (dream.dreamType) {
-      acc[dream.dreamType] = (acc[dream.dreamType] || 0) + 1;
-    }
-    return acc;
-  }, {} as Record<DreamType, number>);
-  
   const recentDreams = dreams.slice(0, 5);
   const averageLength = Math.round(
     dreams.reduce((sum, dream) => sum + dream.text.length, 0) / totalDreams
   );
-  
-  const dreamsWithTypes = dreams.filter(d => d.dreamType).length;
   
   return (
     <ScrollView 
@@ -66,57 +54,7 @@ export default function InsightsScreen() {
           <Text style={styles.statNumber}>{averageLength}</Text>
           <Text style={styles.statLabel}>Avg. Characters</Text>
         </View>
-        
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{dreamsWithTypes}</Text>
-          <Text style={styles.statLabel}>Classified Dreams</Text>
-        </View>
       </View>
-      
-      {dreamsWithTypes > 0 && (
-        <View style={styles.dreamTypeStatsContainer}>
-          <Text style={styles.sectionTitle}>The Five Types of Dreams</Text>
-          <Text style={styles.sectionSubtitle}>
-            Based on the circular dream classification system
-          </Text>
-          
-          {Object.entries(dreamTypeStats).map(([type, count]) => {
-            const typeInfo = getDreamTypeInfo(type as DreamType);
-            return (
-              <View key={type} style={styles.dreamTypeStatCard}>
-                <View style={styles.dreamTypeHeader}>
-                  <View style={styles.dreamTypeTitle}>
-                    <Text style={styles.dreamTypeSymbol}>{typeInfo.symbol}</Text>
-                    <View style={styles.dreamTypeInfo}>
-                      <Text style={[styles.dreamTypeName, { color: typeInfo.color }]}>
-                        {type}
-                      </Text>
-                      <Text style={styles.dreamTypeTimeIndex}>
-                        {typeInfo.timeIndex} • {typeInfo.primaryFunction}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text style={styles.dreamTypeCount}>{count} dreams</Text>
-                </View>
-                <Text style={styles.dreamTypeDescription}>
-                  {typeInfo.symbolicField} • {typeInfo.typicalPhenomena}
-                </Text>
-                <View style={styles.progressBar}>
-                  <View 
-                    style={[
-                      styles.progressFill, 
-                      { 
-                        width: `${(count / dreamsWithTypes) * 100}%`,
-                        backgroundColor: typeInfo.color
-                      }
-                    ]} 
-                  />
-                </View>
-              </View>
-            );
-          })}
-        </View>
-      )}
       
       <View style={styles.personaStatsContainer}>
         <Text style={styles.sectionTitle}>Persona Preferences</Text>
@@ -128,7 +66,6 @@ export default function InsightsScreen() {
             </Text>
             <Text style={styles.personaCount}>{orionCount} interpretations</Text>
           </View>
-          <Text style={styles.personaDescription}>Analytical & Structured</Text>
           <View style={styles.progressBar}>
             <View 
               style={[
@@ -149,7 +86,6 @@ export default function InsightsScreen() {
             </Text>
             <Text style={styles.personaCount}>{limnusCount} interpretations</Text>
           </View>
-          <Text style={styles.personaDescription}>Poetic & Intuitive</Text>
           <View style={styles.progressBar}>
             <View 
               style={[
@@ -169,27 +105,12 @@ export default function InsightsScreen() {
         {recentDreams.map((dream, index) => (
           <View key={dream.id} style={styles.recentItem}>
             <View style={styles.recentHeader}>
-              <View style={styles.recentBadges}>
-                <Text style={[
-                  styles.recentPersona, 
-                  { color: getPersona(dream.persona).color }
-                ]}>
-                  {getPersona(dream.persona).name}
-                </Text>
-                {dream.dreamType && (
-                  <View style={styles.recentDreamTypeBadge}>
-                    <Text style={styles.recentDreamTypeSymbol}>
-                      {getDreamTypeInfo(dream.dreamType).symbol}
-                    </Text>
-                    <Text style={[
-                      styles.recentDreamType,
-                      { color: dreamTypeColors[dream.dreamType] }
-                    ]}>
-                      {dream.dreamType.replace(' Dreams', '')}
-                    </Text>
-                  </View>
-                )}
-              </View>
+              <Text style={[
+                styles.recentPersona, 
+                { color: getPersona(dream.persona).color }
+              ]}>
+                {getPersona(dream.persona).name}
+              </Text>
               <Text style={styles.recentDate}>
                 {new Date(dream.date).toLocaleDateString()}
               </Text>
@@ -202,9 +123,9 @@ export default function InsightsScreen() {
       </View>
       
       <View style={styles.infoContainer}>
-        <Text style={styles.infoTitle}>The Circular Dream System</Text>
+        <Text style={styles.infoTitle}>About Your Journey</Text>
         <Text style={styles.infoText}>
-          Each dream interpretation follows the sacred geometry of the five-fold classification: Past (○), Present (○), Future (○), Non-Dream (✕), and Meta-Lucid (☽). Orion provides analytical insights while Limnus offers poetic wisdom. The spiral at the center represents the recursive nature of consciousness moving through all temporal states.
+          Each dream interpretation adds to your personal understanding. Orion provides analytical insights while Limnus offers poetic wisdom. Together, they help you explore the depths of your subconscious mind.
         </Text>
       </View>
     </ScrollView>
@@ -253,70 +174,15 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 14,
     color: Colors.dark.subtext,
-    textAlign: 'center',
   },
-  dreamTypeStatsContainer: {
+  personaStatsContainer: {
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
     color: Colors.dark.text,
-    marginBottom: 8,
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    color: Colors.dark.subtext,
     marginBottom: 16,
-    fontStyle: 'italic',
-  },
-  dreamTypeStatCard: {
-    backgroundColor: Colors.dark.card,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-  },
-  dreamTypeHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  dreamTypeTitle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  dreamTypeSymbol: {
-    fontSize: 20,
-    marginRight: 12,
-    color: Colors.dark.text,
-    fontWeight: '600',
-  },
-  dreamTypeInfo: {
-    flex: 1,
-  },
-  dreamTypeName: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  dreamTypeTimeIndex: {
-    fontSize: 12,
-    color: Colors.dark.subtext,
-    marginTop: 2,
-  },
-  dreamTypeCount: {
-    fontSize: 14,
-    color: Colors.dark.subtext,
-  },
-  dreamTypeDescription: {
-    fontSize: 13,
-    color: Colors.dark.subtext,
-    marginBottom: 8,
-    fontStyle: 'italic',
-  },
-  personaStatsContainer: {
-    marginBottom: 24,
   },
   personaStatCard: {
     backgroundColor: Colors.dark.card,
@@ -328,7 +194,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 8,
   },
   personaName: {
     fontSize: 18,
@@ -337,12 +203,6 @@ const styles = StyleSheet.create({
   personaCount: {
     fontSize: 14,
     color: Colors.dark.subtext,
-  },
-  personaDescription: {
-    fontSize: 13,
-    color: Colors.dark.subtext,
-    marginBottom: 8,
-    fontStyle: 'italic',
   },
   progressBar: {
     height: 6,
@@ -366,31 +226,12 @@ const styles = StyleSheet.create({
   recentHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  recentBadges: {
-    flexDirection: 'row',
-    gap: 8,
-    flex: 1,
     alignItems: 'center',
+    marginBottom: 8,
   },
   recentPersona: {
     fontSize: 16,
     fontWeight: '600',
-  },
-  recentDreamTypeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  recentDreamTypeSymbol: {
-    fontSize: 14,
-    color: Colors.dark.text,
-  },
-  recentDreamType: {
-    fontSize: 14,
-    fontWeight: '500',
   },
   recentDate: {
     fontSize: 14,

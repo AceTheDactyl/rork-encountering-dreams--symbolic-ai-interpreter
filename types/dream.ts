@@ -1,17 +1,8 @@
-export type DreamType = 
-  | 'Mnemonic Dreams'
-  | 'Psychic Dreams' 
-  | 'Pre-Echo Dreams'
-  | 'Lucid Dreams'
-  | 'Meta-Lucid Dreams';
-
 export interface Dream {
   id: string;
   text: string;
   persona: 'orion' | 'limnus';
   interpretation: string;
-  dreamType?: DreamType;
-  rationale?: string;
   date: string;
 }
 
@@ -21,21 +12,4 @@ export interface Persona {
   description: string;
   color: string;
   systemPrompt: string;
-}
-
-export interface InterpretationResponse {
-  dreamType: DreamType;
-  rationale: string;
-  interpretation: string;
-}
-
-export interface DreamTypeInfo {
-  name: DreamType;
-  timeIndex: string;
-  primaryFunction: string;
-  symbolicField: string;
-  typicalPhenomena: string;
-  symbol: string;
-  position: 'past' | 'present' | 'future' | 'now' | 'recursive';
-  color: string;
 }

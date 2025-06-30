@@ -3,7 +3,6 @@ import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Dream } from '@/types/dream';
 import { getPersona } from '@/constants/personas';
-import { getDreamTypeInfo, isValidDreamType } from '@/constants/dreamTypes';
 import Colors from '@/constants/colors';
 
 interface DreamLogItemProps {
@@ -13,11 +12,6 @@ interface DreamLogItemProps {
 export default function DreamLogItem({ dream }: DreamLogItemProps) {
   const router = useRouter();
   const persona = getPersona(dream.persona);
-  
-  // Validate dream type before getting info
-  const dreamTypeInfo = dream.dreamType && isValidDreamType(dream.dreamType) 
-    ? getDreamTypeInfo(dream.dreamType) 
-    : null;
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -42,20 +36,10 @@ export default function DreamLogItem({ dream }: DreamLogItemProps) {
   return (
     <Pressable style={styles.container} onPress={handlePress}>
       <View style={styles.header}>
-        <View style={styles.badgeContainer}>
-          <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
-            <Text style={[styles.personaText, { color: persona.color }]}>
-              {persona.name}
-            </Text>
-          </View>
-          {dreamTypeInfo && (
-            <View style={[styles.dreamTypeBadge, { backgroundColor: dreamTypeInfo.color + '33' }]}>
-              <Text style={styles.dreamTypeSymbol}>{dreamTypeInfo.symbol}</Text>
-              <Text style={[styles.dreamTypeText, { color: dreamTypeInfo.color }]}>
-                {dream.dreamType?.replace(' Dreams', '')}
-              </Text>
-            </View>
-          )}
+        <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
+          <Text style={[styles.personaText, { color: persona.color }]}>
+            {persona.name}
+          </Text>
         </View>
         <Text style={styles.date}>{formatDate(dream.date)}</Text>
       </View>
@@ -64,32 +48,12 @@ export default function DreamLogItem({ dream }: DreamLogItemProps) {
         {truncateText(dream.text)}
       </Text>
       
-      {dream.rationale && dreamTypeInfo && (
-        <View style={styles.rationaleContainer}>
-          <Text style={styles.rationaleLabel}>
-            {dreamTypeInfo.timeIndex} Classification:
-          </Text>
-          <Text style={styles.rationaleText}>
-            {truncateText(dream.rationale, 120)}
-          </Text>
-        </View>
-      )}
-      
       <View style={styles.interpretationContainer}>
         <Text style={styles.interpretationLabel}>Interpretation:</Text>
         <Text style={styles.interpretationText}>
           {truncateText(dream.interpretation, 150)}
         </Text>
       </View>
-      
-      {/* Debug info - remove in production */}
-      {__DEV__ && dream.dreamType && (
-        <View style={styles.debugContainer}>
-          <Text style={styles.debugText}>
-            Debug: {dream.dreamType} | Valid: {isValidDreamType(dream.dreamType).toString()}
-          </Text>
-        </View>
-      )}
     </Pressable>
   );
 }
@@ -106,15 +70,8 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  badgeContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    flex: 1,
-    flexWrap: 'wrap',
     alignItems: 'center',
+    marginBottom: 12,
   },
   personaBadge: {
     paddingHorizontal: 12,
@@ -125,26 +82,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  dreamTypeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 4,
-  },
-  dreamTypeSymbol: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  dreamTypeText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
   date: {
     fontSize: 14,
     color: Colors.dark.subtext,
-    marginLeft: 8,
   },
   dreamText: {
     fontSize: 16,
@@ -152,24 +92,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 12,
     fontWeight: '500',
-  },
-  rationaleContainer: {
-    marginBottom: 12,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border,
-  },
-  rationaleLabel: {
-    fontSize: 14,
-    color: Colors.dark.subtext,
-    marginBottom: 4,
-  },
-  rationaleText: {
-    fontSize: 14,
-    color: Colors.dark.text,
-    lineHeight: 18,
-    opacity: 0.9,
-    fontStyle: 'italic',
   },
   interpretationContainer: {
     borderTopWidth: 1,
@@ -186,16 +108,5 @@ const styles = StyleSheet.create({
     color: Colors.dark.text,
     lineHeight: 20,
     opacity: 0.9,
-  },
-  debugContainer: {
-    marginTop: 8,
-    padding: 8,
-    backgroundColor: Colors.dark.background,
-    borderRadius: 4,
-  },
-  debugText: {
-    fontSize: 12,
-    color: Colors.dark.subtext,
-    fontFamily: 'monospace',
   },
 });

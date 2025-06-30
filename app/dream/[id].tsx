@@ -6,7 +6,6 @@ import { Share2, Trash2 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useDreamStore } from '@/store/dreamStore';
 import { getPersona } from '@/constants/personas';
-import { getDreamTypeInfo, isValidDreamType } from '@/constants/dreamTypes';
 import Button from '@/components/Button';
 
 export default function DreamDetailScreen() {
@@ -33,11 +32,6 @@ export default function DreamDetailScreen() {
   
   const persona = getPersona(dream.persona);
   
-  // Validate dream type before getting info
-  const dreamTypeInfo = dream.dreamType && isValidDreamType(dream.dreamType) 
-    ? getDreamTypeInfo(dream.dreamType) 
-    : null;
-  
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -52,16 +46,11 @@ export default function DreamDetailScreen() {
   
   const handleShare = async () => {
     try {
-      const dreamTypeInfo = dream.dreamType ? `
-
-Dream Type: ${dream.dreamType}
-${dream.rationale || ''}` : '';
-      
       await Share.share({
         title: `Dream interpreted by ${persona.name}`,
         message: `My Dream:
 
-${dream.text}${dreamTypeInfo}
+${dream.text}
 
 ${persona.name}'s Interpretation:
 
@@ -93,48 +82,14 @@ Interpreted on ${formatDate(dream.date)}`,
     >
       <View style={styles.header}>
         <View style={styles.metaContainer}>
-          <View style={styles.badgeContainer}>
-            <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
-              <Text style={[styles.personaText, { color: persona.color }]}>
-                {persona.name}
-              </Text>
-            </View>
-            {dreamTypeInfo && (
-              <View style={[styles.dreamTypeBadge, { backgroundColor: dreamTypeInfo.color + '33' }]}>
-                <Text style={styles.dreamTypeSymbol}>{dreamTypeInfo.symbol}</Text>
-                <Text style={[styles.dreamTypeText, { color: dreamTypeInfo.color }]}>
-                  {dream.dreamType}
-                </Text>
-              </View>
-            )}
+          <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
+            <Text style={[styles.personaText, { color: persona.color }]}>
+              {persona.name}
+            </Text>
           </View>
           <Text style={styles.date}>{formatDate(dream.date)}</Text>
         </View>
       </View>
-      
-      {dreamTypeInfo && (
-        <View style={[styles.dreamTypeContainer, { borderLeftColor: dreamTypeInfo.color }]}>
-          <View style={styles.dreamTypeHeader}>
-            <Text style={styles.dreamTypeSymbolLarge}>{dreamTypeInfo.symbol}</Text>
-            <View style={styles.dreamTypeDetails}>
-              <Text style={[styles.dreamTypeTitle, { color: dreamTypeInfo.color }]}>
-                {dream.dreamType}
-              </Text>
-              <Text style={styles.dreamTypeTimeIndex}>
-                {dreamTypeInfo.timeIndex} • {dreamTypeInfo.primaryFunction}
-              </Text>
-            </View>
-          </View>
-          <Text style={styles.dreamTypeDescription}>
-            {dreamTypeInfo.symbolicField} • {dreamTypeInfo.typicalPhenomena}
-          </Text>
-          {dream.rationale && (
-            <Text style={styles.rationaleText}>
-              {dream.rationale}
-            </Text>
-          )}
-        </View>
-      )}
       
       <View style={styles.dreamContainer}>
         <Text style={styles.sectionTitle}>Your Dream</Text>
@@ -170,24 +125,6 @@ Interpreted on ${formatDate(dream.date)}`,
           Tap the delete button again to confirm
         </Text>
       )}
-      
-      {/* Debug info - remove in production */}
-      {__DEV__ && dream.dreamType && (
-        <View style={styles.debugContainer}>
-          <Text style={styles.debugText}>
-            Debug Info:
-          </Text>
-          <Text style={styles.debugText}>
-            Dream Type: {dream.dreamType}
-          </Text>
-          <Text style={styles.debugText}>
-            Valid Type: {isValidDreamType(dream.dreamType).toString()}
-          </Text>
-          <Text style={styles.debugText}>
-            Has Type Info: {dreamTypeInfo ? 'Yes' : 'No'}
-          </Text>
-        </View>
-      )}
     </ScrollView>
   );
 }
@@ -204,13 +141,9 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   metaContainer: {
-    flexDirection: 'column',
-    gap: 12,
-  },
-  badgeContainer: {
     flexDirection: 'row',
-    gap: 8,
-    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   personaBadge: {
     paddingHorizontal: 16,
@@ -221,67 +154,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  dreamTypeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 6,
-  },
-  dreamTypeSymbol: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  dreamTypeText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
   date: {
     fontSize: 14,
     color: Colors.dark.subtext,
-  },
-  dreamTypeContainer: {
-    backgroundColor: Colors.dark.card,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-    borderLeftWidth: 4,
-  },
-  dreamTypeHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  dreamTypeSymbolLarge: {
-    fontSize: 24,
-    marginRight: 12,
-    color: Colors.dark.text,
-    fontWeight: '600',
-  },
-  dreamTypeDetails: {
-    flex: 1,
-  },
-  dreamTypeTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  dreamTypeTimeIndex: {
-    fontSize: 13,
-    color: Colors.dark.subtext,
-  },
-  dreamTypeDescription: {
-    fontSize: 14,
-    color: Colors.dark.subtext,
-    marginBottom: 12,
-    fontStyle: 'italic',
-  },
-  rationaleText: {
-    fontSize: 15,
-    color: Colors.dark.text,
-    lineHeight: 22,
-    opacity: 0.9,
   },
   dreamContainer: {
     backgroundColor: Colors.dark.card,
@@ -341,19 +216,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.dark.text,
     textAlign: 'center',
-  },
-  debugContainer: {
-    marginTop: 16,
-    padding: 12,
-    backgroundColor: Colors.dark.background,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-  },
-  debugText: {
-    fontSize: 12,
-    color: Colors.dark.subtext,
-    fontFamily: 'monospace',
-    marginBottom: 4,
   },
 });
