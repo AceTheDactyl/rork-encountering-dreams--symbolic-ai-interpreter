@@ -8,9 +8,11 @@ import Colors from '@/constants/colors';
 
 interface DreamLogItemProps {
   dream: Dream;
+  showGroupHeader?: boolean;
+  groupTitle?: string;
 }
 
-export default function DreamLogItem({ dream }: DreamLogItemProps) {
+export default function DreamLogItem({ dream, showGroupHeader, groupTitle }: DreamLogItemProps) {
   const router = useRouter();
   const persona = getPersona(dream.persona);
   const dreamType = getDreamType(dream.dreamType);
@@ -36,43 +38,69 @@ export default function DreamLogItem({ dream }: DreamLogItemProps) {
   };
   
   return (
-    <Pressable style={styles.container} onPress={handlePress}>
-      <View style={styles.header}>
-        <View style={styles.badgeContainer}>
-          <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
-            <Text style={[styles.personaText, { color: persona.color }]}>
-              {persona.name}
-            </Text>
-          </View>
-          {dreamType && (
-            <View style={[styles.dreamTypeBadge, { backgroundColor: dreamType.color + '33' }]}>
-              <Text style={[styles.dreamTypeSymbol, { color: dreamType.color }]}>
-                {dreamType.symbol}
-              </Text>
-              <Text style={[styles.dreamTypeText, { color: dreamType.color }]}>
-                {dreamType.name}
+    <View>
+      {showGroupHeader && groupTitle && (
+        <View style={styles.groupHeader}>
+          <Text style={styles.groupTitle}>{groupTitle}</Text>
+        </View>
+      )}
+      
+      <Pressable style={styles.container} onPress={handlePress}>
+        <View style={styles.header}>
+          <View style={styles.badgeContainer}>
+            <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
+              <Text style={[styles.personaText, { color: persona.color }]}>
+                {persona.name}
               </Text>
             </View>
-          )}
+            {dreamType && (
+              <View style={[styles.dreamTypeBadge, { backgroundColor: dreamType.color + '33' }]}>
+                <Text style={[styles.dreamTypeSymbol, { color: dreamType.color }]}>
+                  {dreamType.symbol}
+                </Text>
+                <Text style={[styles.dreamTypeText, { color: dreamType.color }]}>
+                  {dreamType.name}
+                </Text>
+              </View>
+            )}
+          </View>
+          <Text style={styles.date}>{formatDate(dream.date)}</Text>
         </View>
-        <Text style={styles.date}>{formatDate(dream.date)}</Text>
-      </View>
-      
-      <Text style={styles.dreamText}>
-        {truncateText(dream.text)}
-      </Text>
-      
-      <View style={styles.interpretationContainer}>
-        <Text style={styles.interpretationLabel}>Interpretation:</Text>
-        <Text style={styles.interpretationText}>
-          {truncateText(dream.interpretation, 150)}
+        
+        <Text style={styles.dreamText}>
+          {truncateText(dream.text)}
         </Text>
-      </View>
-    </Pressable>
+        
+        <View style={styles.interpretationContainer}>
+          <Text style={styles.interpretationLabel}>Interpretation:</Text>
+          <Text style={styles.interpretationText}>
+            {truncateText(dream.interpretation, 150)}
+          </Text>
+        </View>
+        
+        <View style={styles.footer}>
+          <Text style={styles.lengthIndicator}>
+            {dream.text.length} characters
+          </Text>
+        </View>
+      </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  groupHeader: {
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    marginTop: 8,
+  },
+  groupTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.dark.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
   container: {
     backgroundColor: Colors.dark.card,
     borderRadius: 12,
@@ -134,6 +162,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: Colors.dark.border,
     paddingTop: 12,
+    marginBottom: 8,
   },
   interpretationLabel: {
     fontSize: 14,
@@ -145,5 +174,14 @@ const styles = StyleSheet.create({
     color: Colors.dark.text,
     lineHeight: 20,
     opacity: 0.9,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  lengthIndicator: {
+    fontSize: 12,
+    color: Colors.dark.subtext,
+    opacity: 0.7,
   },
 });
