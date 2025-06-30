@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Dream } from '@/types/dream';
 import { getPersona } from '@/constants/personas';
-import { getDreamTypeInfo } from '@/constants/dreamTypes';
+import { getDreamTypeInfo, isValidDreamType } from '@/constants/dreamTypes';
 import Colors from '@/constants/colors';
 
 interface DreamLogItemProps {
@@ -13,7 +13,11 @@ interface DreamLogItemProps {
 export default function DreamLogItem({ dream }: DreamLogItemProps) {
   const router = useRouter();
   const persona = getPersona(dream.persona);
-  const dreamTypeInfo = dream.dreamType ? getDreamTypeInfo(dream.dreamType) : null;
+  
+  // Validate dream type before getting info
+  const dreamTypeInfo = dream.dreamType && isValidDreamType(dream.dreamType) 
+    ? getDreamTypeInfo(dream.dreamType) 
+    : null;
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -77,6 +81,15 @@ export default function DreamLogItem({ dream }: DreamLogItemProps) {
           {truncateText(dream.interpretation, 150)}
         </Text>
       </View>
+      
+      {/* Debug info - remove in production */}
+      {__DEV__ && dream.dreamType && (
+        <View style={styles.debugContainer}>
+          <Text style={styles.debugText}>
+            Debug: {dream.dreamType} | Valid: {isValidDreamType(dream.dreamType).toString()}
+          </Text>
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -173,5 +186,16 @@ const styles = StyleSheet.create({
     color: Colors.dark.text,
     lineHeight: 20,
     opacity: 0.9,
+  },
+  debugContainer: {
+    marginTop: 8,
+    padding: 8,
+    backgroundColor: Colors.dark.background,
+    borderRadius: 4,
+  },
+  debugText: {
+    fontSize: 12,
+    color: Colors.dark.subtext,
+    fontFamily: 'monospace',
   },
 });

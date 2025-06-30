@@ -6,7 +6,7 @@ import { Share2, Trash2 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useDreamStore } from '@/store/dreamStore';
 import { getPersona } from '@/constants/personas';
-import { getDreamTypeInfo } from '@/constants/dreamTypes';
+import { getDreamTypeInfo, isValidDreamType } from '@/constants/dreamTypes';
 import Button from '@/components/Button';
 
 export default function DreamDetailScreen() {
@@ -32,7 +32,11 @@ export default function DreamDetailScreen() {
   }
   
   const persona = getPersona(dream.persona);
-  const dreamTypeInfo = dream.dreamType ? getDreamTypeInfo(dream.dreamType) : null;
+  
+  // Validate dream type before getting info
+  const dreamTypeInfo = dream.dreamType && isValidDreamType(dream.dreamType) 
+    ? getDreamTypeInfo(dream.dreamType) 
+    : null;
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -165,6 +169,24 @@ Interpreted on ${formatDate(dream.date)}`,
         <Text style={styles.deleteConfirmText}>
           Tap the delete button again to confirm
         </Text>
+      )}
+      
+      {/* Debug info - remove in production */}
+      {__DEV__ && dream.dreamType && (
+        <View style={styles.debugContainer}>
+          <Text style={styles.debugText}>
+            Debug Info:
+          </Text>
+          <Text style={styles.debugText}>
+            Dream Type: {dream.dreamType}
+          </Text>
+          <Text style={styles.debugText}>
+            Valid Type: {isValidDreamType(dream.dreamType).toString()}
+          </Text>
+          <Text style={styles.debugText}>
+            Has Type Info: {dreamTypeInfo ? 'Yes' : 'No'}
+          </Text>
+        </View>
       )}
     </ScrollView>
   );
@@ -319,5 +341,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.dark.text,
     textAlign: 'center',
+  },
+  debugContainer: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: Colors.dark.background,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
+  },
+  debugText: {
+    fontSize: 12,
+    color: Colors.dark.subtext,
+    fontFamily: 'monospace',
+    marginBottom: 4,
   },
 });

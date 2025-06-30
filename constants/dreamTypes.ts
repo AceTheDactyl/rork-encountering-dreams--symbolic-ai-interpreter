@@ -72,3 +72,16 @@ export const dreamTypeDescriptions = {
   'Lucid Dreams': 'Now/overlaid • Symbol control • Agency kernel',
   'Meta-Lucid Dreams': 'Recursive/all • Architectural interface • Compression core',
 };
+
+// Helper function to validate dream types
+export const isValidDreamType = (type: string): type is DreamType => {
+  return Object.keys(dreamTypeInfo).includes(type);
+};
+
+// Helper function to get dream type symbol with fallback
+export const getDreamTypeSymbol = (dreamType?: DreamType): string => {
+  if (!dreamType || !isValidDreamType(dreamType)) {
+    return '○';
+  }
+  return dreamTypeInfo[dreamType].symbol;
+};

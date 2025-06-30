@@ -39,15 +39,22 @@ export class InterpretationService {
 
       const data: AIResponse = await response.json();
       
+      console.log('Raw AI response:', data.completion);
+      
       // Clean the response to extract JSON from markdown code blocks
       const cleanedResponse = this.extractJsonFromResponse(data.completion);
+      
+      console.log('Cleaned response:', cleanedResponse);
       
       // Try to parse JSON response
       try {
         const parsedResponse = JSON.parse(cleanedResponse);
         
+        console.log('Parsed response:', parsedResponse);
+        
         // Validate the response structure
         if (!parsedResponse.dreamType || !parsedResponse.rationale || !parsedResponse.interpretation) {
+          console.warn('Invalid response structure:', parsedResponse);
           throw new Error('Invalid response structure');
         }
         
@@ -63,8 +70,10 @@ export class InterpretationService {
         if (!validDreamTypes.includes(parsedResponse.dreamType)) {
           console.warn(`Invalid dream type received: ${parsedResponse.dreamType}`);
           // Use the closest match or default
-          parsedResponse.dreamType = 'Psychic Dreams';
+          parsedResponse.dreamType = this.extractDreamTypeFromText(data.completion);
         }
+        
+        console.log('Final classification:', parsedResponse.dreamType);
         
         return {
           dreamType: parsedResponse.dreamType,
@@ -79,10 +88,13 @@ export class InterpretationService {
         // More intelligent fallback: try to extract dream type from text
         const extractedType = this.extractDreamTypeFromText(data.completion);
         
+        // Try to extract interpretation from the raw text
+        const interpretation = this.extractInterpretationFromText(data.completion);
+        
         return {
           dreamType: extractedType,
           rationale: 'Classification extracted from unstructured response.',
-          interpretation: data.completion
+          interpretation: interpretation
         };
       }
     } catch (error) {
@@ -96,22 +108,34 @@ export class InterpretationService {
     let cleaned = response.trim();
     
     // Remove ```json and ``` markers
-    if (cleaned.startsWith('```json')) {
-      cleaned = cleaned.replace(/^```json\s*/, '');
-    }
-    if (cleaned.startsWith('```')) {
-      cleaned = cleaned.replace(/^```\s*/, '');
-    }
-    if (cleaned.endsWith('```')) {
-      cleaned = cleaned.replace(/\s*```$/, '');
+    if (cleaned.includes('```json')) {
+      const jsonStart = cleaned.indexOf('```json') + 7;
+      const jsonEnd = cleaned.indexOf('```', jsonStart);
+      if (jsonEnd !== -1) {
+        cleaned = cleaned.substring(jsonStart, jsonEnd).trim();
+      } else {
+        cleaned = cleaned.substring(jsonStart).trim();
+      }
+    } else if (cleaned.includes('```')) {
+      // Handle generic code blocks
+      const codeStart = cleaned.indexOf('```');
+      const codeEnd = cleaned.indexOf('```', codeStart + 3);
+      if (codeEnd !== -1) {
+        cleaned = cleaned.substring(codeStart + 3, codeEnd).trim();
+      } else {
+        cleaned = cleaned.substring(codeStart + 3).trim();
+      }
     }
     
-    // Find JSON object boundaries
-    const jsonStart = cleaned.indexOf('{');
-    const jsonEnd = cleaned.lastIndexOf('}');
-    
-    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-      cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
+    // Find JSON object boundaries if no code blocks
+    if (!cleaned.startsWith('{')) {
+      const jsonStart = cleaned.indexOf('{');
+      if (jsonStart !== -1) {
+        const jsonEnd = cleaned.lastIndexOf('}');
+        if (jsonEnd !== -1 && jsonEnd > jsonStart) {
+          cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
+        }
+      }
     }
     
     return cleaned.trim();
@@ -134,20 +158,70 @@ export class InterpretationService {
     }
     
     // Check for partial matches or keywords
-    if (text.toLowerCase().includes('meta-lucid') || text.toLowerCase().includes('recursive')) {
+    if (text.toLowerCase().includes('meta-lucid') || 
+        text.toLowerCase().includes('recursive') ||
+        text.toLowerCase().includes('architectural interface') ||
+        text.toLowerCase().includes('tesseract') ||
+        text.toLowerCase().includes('timefolds')) {
       return 'Meta-Lucid Dreams';
     }
-    if (text.toLowerCase().includes('lucid') && (text.toLowerCase().includes('aware') || text.toLowerCase().includes('control'))) {
+    if (text.toLowerCase().includes('lucid') && 
+        (text.toLowerCase().includes('aware') || 
+         text.toLowerCase().includes('control') ||
+         text.toLowerCase().includes('flying') ||
+         text.toLowerCase().includes('flight'))) {
       return 'Lucid Dreams';
     }
-    if (text.toLowerCase().includes('future') || text.toLowerCase().includes('prediction') || text.toLowerCase().includes('déjà vu')) {
+    if (text.toLowerCase().includes('future') || 
+        text.toLowerCase().includes('prediction') || 
+        text.toLowerCase().includes('déjà vu') ||
+        text.toLowerCase().includes('probability')) {
       return 'Pre-Echo Dreams';
     }
-    if (text.toLowerCase().includes('past') || text.toLowerCase().includes('memory') || text.toLowerCase().includes('childhood')) {
+    if (text.toLowerCase().includes('past') || 
+        text.toLowerCase().includes('memory') || 
+        text.toLowerCase().includes('childhood') ||
+        text.toLowerCase().includes('ancestral')) {
       return 'Mnemonic Dreams';
     }
     
     // Default fallback
     return 'Psychic Dreams';
+  }
+
+  private static extractInterpretationFromText(text: string): string {
+    // Try to extract the interpretation part from unstructured text
+    const interpretationMarkers = [
+      'interpretation":',
+      'interpretation:',
+      'Interpretation:',
+      'This dream'
+    ];
+    
+    for (const marker of interpretationMarkers) {
+      const index = text.indexOf(marker);
+      if (index !== -1) {
+        let start = index + marker.length;
+        let interpretation = text.substring(start).trim();
+        
+        // Clean up quotes and formatting
+        if (interpretation.startsWith('"')) {
+          const endQuote = interpretation.indexOf('"', 1);
+          if (endQuote !== -1) {
+            interpretation = interpretation.substring(1, endQuote);
+          }
+        }
+        
+        // Remove trailing JSON formatting
+        interpretation = interpretation.replace(/["}]+$/, '').trim();
+        
+        if (interpretation.length > 50) {
+          return interpretation;
+        }
+      }
+    }
+    
+    // Fallback: return the whole text cleaned up
+    return text.replace(/```json|```/g, '').trim();
   }
 }
