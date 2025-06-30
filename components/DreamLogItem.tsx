@@ -9,6 +9,14 @@ interface DreamLogItemProps {
   dream: Dream;
 }
 
+const dreamTypeColors = {
+  'Mnemonic Dreams': '#8B5CF6',
+  'Psychic Dreams': '#06B6D4', 
+  'Pre-Echo Dreams': '#10B981',
+  'Lucid Dreams': '#F59E0B',
+  'Meta-Lucid Dreams': '#EF4444',
+};
+
 export default function DreamLogItem({ dream }: DreamLogItemProps) {
   const router = useRouter();
   const persona = getPersona(dream.persona);
@@ -33,13 +41,24 @@ export default function DreamLogItem({ dream }: DreamLogItemProps) {
     router.push(`/dream/${dream.id}`);
   };
   
+  const dreamTypeColor = dream.dreamType ? dreamTypeColors[dream.dreamType] : Colors.dark.subtext;
+  
   return (
     <Pressable style={styles.container} onPress={handlePress}>
       <View style={styles.header}>
-        <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
-          <Text style={[styles.personaText, { color: persona.color }]}>
-            {persona.name}
-          </Text>
+        <View style={styles.badgeContainer}>
+          <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
+            <Text style={[styles.personaText, { color: persona.color }]}>
+              {persona.name}
+            </Text>
+          </View>
+          {dream.dreamType && (
+            <View style={[styles.dreamTypeBadge, { backgroundColor: dreamTypeColor + '33' }]}>
+              <Text style={[styles.dreamTypeText, { color: dreamTypeColor }]}>
+                {dream.dreamType.replace(' Dreams', '')}
+              </Text>
+            </View>
+          )}
         </View>
         <Text style={styles.date}>{formatDate(dream.date)}</Text>
       </View>
@@ -47,6 +66,15 @@ export default function DreamLogItem({ dream }: DreamLogItemProps) {
       <Text style={styles.dreamText}>
         {truncateText(dream.text)}
       </Text>
+      
+      {dream.rationale && (
+        <View style={styles.rationaleContainer}>
+          <Text style={styles.rationaleLabel}>Classification:</Text>
+          <Text style={styles.rationaleText}>
+            {truncateText(dream.rationale, 120)}
+          </Text>
+        </View>
+      )}
       
       <View style={styles.interpretationContainer}>
         <Text style={styles.interpretationLabel}>Interpretation:</Text>
@@ -70,8 +98,14 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 12,
+  },
+  badgeContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    flex: 1,
+    flexWrap: 'wrap',
   },
   personaBadge: {
     paddingHorizontal: 12,
@@ -82,9 +116,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  dreamTypeBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  dreamTypeText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
   date: {
     fontSize: 14,
     color: Colors.dark.subtext,
+    marginLeft: 8,
   },
   dreamText: {
     fontSize: 16,
@@ -92,6 +136,24 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 12,
     fontWeight: '500',
+  },
+  rationaleContainer: {
+    marginBottom: 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.dark.border,
+  },
+  rationaleLabel: {
+    fontSize: 14,
+    color: Colors.dark.subtext,
+    marginBottom: 4,
+  },
+  rationaleText: {
+    fontSize: 14,
+    color: Colors.dark.text,
+    lineHeight: 18,
+    opacity: 0.9,
+    fontStyle: 'italic',
   },
   interpretationContainer: {
     borderTopWidth: 1,

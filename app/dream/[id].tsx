@@ -8,6 +8,22 @@ import { useDreamStore } from '@/store/dreamStore';
 import { getPersona } from '@/constants/personas';
 import Button from '@/components/Button';
 
+const dreamTypeColors = {
+  'Mnemonic Dreams': '#8B5CF6',
+  'Psychic Dreams': '#06B6D4', 
+  'Pre-Echo Dreams': '#10B981',
+  'Lucid Dreams': '#F59E0B',
+  'Meta-Lucid Dreams': '#EF4444',
+};
+
+const dreamTypeDescriptions = {
+  'Mnemonic Dreams': 'Past-focused • Memory recursion • Echo fields',
+  'Psychic Dreams': 'Present-focused • Emotional integration • Stress grid',
+  'Pre-Echo Dreams': 'Future-focused • Probability tuning • Vector threads',
+  'Lucid Dreams': 'Now/overlaid • Symbol control • Agency kernel',
+  'Meta-Lucid Dreams': 'Recursive/all • Architectural interface • Compression core',
+};
+
 export default function DreamDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -31,6 +47,7 @@ export default function DreamDetailScreen() {
   }
   
   const persona = getPersona(dream.persona);
+  const dreamTypeColor = dream.dreamType ? dreamTypeColors[dream.dreamType] : Colors.dark.subtext;
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -46,11 +63,13 @@ export default function DreamDetailScreen() {
   
   const handleShare = async () => {
     try {
+      const dreamTypeInfo = dream.dreamType ? `\n\nDream Type: ${dream.dreamType}\n${dream.rationale || ''}` : '';
+      
       await Share.share({
         title: `Dream interpreted by ${persona.name}`,
         message: `My Dream:
 
-${dream.text}
+${dream.text}${dreamTypeInfo}
 
 ${persona.name}'s Interpretation:
 
@@ -82,14 +101,39 @@ Interpreted on ${formatDate(dream.date)}`,
     >
       <View style={styles.header}>
         <View style={styles.metaContainer}>
-          <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
-            <Text style={[styles.personaText, { color: persona.color }]}>
-              {persona.name}
-            </Text>
+          <View style={styles.badgeContainer}>
+            <View style={[styles.personaBadge, { backgroundColor: persona.color + '33' }]}>
+              <Text style={[styles.personaText, { color: persona.color }]}>
+                {persona.name}
+              </Text>
+            </View>
+            {dream.dreamType && (
+              <View style={[styles.dreamTypeBadge, { backgroundColor: dreamTypeColor + '33' }]}>
+                <Text style={[styles.dreamTypeText, { color: dreamTypeColor }]}>
+                  {dream.dreamType}
+                </Text>
+              </View>
+            )}
           </View>
           <Text style={styles.date}>{formatDate(dream.date)}</Text>
         </View>
       </View>
+      
+      {dream.dreamType && (
+        <View style={[styles.dreamTypeContainer, { borderLeftColor: dreamTypeColor }]}>
+          <Text style={[styles.dreamTypeTitle, { color: dreamTypeColor }]}>
+            {dream.dreamType}
+          </Text>
+          <Text style={styles.dreamTypeDescription}>
+            {dreamTypeDescriptions[dream.dreamType]}
+          </Text>
+          {dream.rationale && (
+            <Text style={styles.rationaleText}>
+              {dream.rationale}
+            </Text>
+          )}
+        </View>
+      )}
       
       <View style={styles.dreamContainer}>
         <Text style={styles.sectionTitle}>Your Dream</Text>
@@ -141,9 +185,13 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   metaContainer: {
+    flexDirection: 'column',
+    gap: 12,
+  },
+  badgeContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
   },
   personaBadge: {
     paddingHorizontal: 16,
@@ -154,9 +202,42 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  dreamTypeBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  dreamTypeText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
   date: {
     fontSize: 14,
     color: Colors.dark.subtext,
+  },
+  dreamTypeContainer: {
+    backgroundColor: Colors.dark.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    borderLeftWidth: 4,
+  },
+  dreamTypeTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  dreamTypeDescription: {
+    fontSize: 14,
+    color: Colors.dark.subtext,
+    marginBottom: 12,
+    fontStyle: 'italic',
+  },
+  rationaleText: {
+    fontSize: 15,
+    color: Colors.dark.text,
+    lineHeight: 22,
+    opacity: 0.9,
   },
   dreamContainer: {
     backgroundColor: Colors.dark.card,

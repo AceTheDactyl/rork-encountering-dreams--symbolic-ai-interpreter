@@ -1,4 +1,4 @@
-import { Persona } from '@/types/dream';
+import { Persona, InterpretationResponse } from '@/types/dream';
 
 interface AIMessage {
   role: 'system' | 'user' | 'assistant';
@@ -12,7 +12,7 @@ interface AIResponse {
 export class InterpretationService {
   private static readonly API_URL = 'https://toolkit.rork.com/text/llm/';
 
-  static async interpretDream(dreamText: string, persona: Persona): Promise<string> {
+  static async interpretDream(dreamText: string, persona: Persona): Promise<InterpretationResponse> {
     try {
       const messages: AIMessage[] = [
         {
@@ -21,7 +21,7 @@ export class InterpretationService {
         },
         {
           role: 'user',
-          content: `Please interpret this dream: ${dreamText}`
+          content: `Please interpret and classify this dream: ${dreamText}`
         }
       ];
 
@@ -38,7 +38,29 @@ export class InterpretationService {
       }
 
       const data: AIResponse = await response.json();
-      return data.completion;
+      
+      // Try to parse JSON response
+      try {
+        const parsedResponse = JSON.parse(data.completion);
+        
+        // Validate the response structure
+        if (!parsedResponse.dreamType || !parsedResponse.rationale || !parsedResponse.interpretation) {
+          throw new Error('Invalid response structure');
+        }
+        
+        return {
+          dreamType: parsedResponse.dreamType,
+          rationale: parsedResponse.rationale,
+          interpretation: parsedResponse.interpretation
+        };
+      } catch (parseError) {
+        // Fallback: treat the entire response as interpretation with unknown type
+        return {
+          dreamType: 'Psychic Dreams', // Default fallback
+          rationale: 'Classification unavailable due to response format.',
+          interpretation: data.completion
+        };
+      }
     } catch (error) {
       console.error('Interpretation service error:', error);
       throw new Error('Unable to retrieve interpretation. Please check your internet connection and try again.');

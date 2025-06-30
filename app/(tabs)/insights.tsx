@@ -3,8 +3,17 @@ import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDreamStore } from '@/store/dreamStore';
 import { getPersona } from '@/constants/personas';
+import { DreamType } from '@/types/dream';
 import Colors from '@/constants/colors';
 import EmptyState from '@/components/EmptyState';
+
+const dreamTypeColors = {
+  'Mnemonic Dreams': '#8B5CF6',
+  'Psychic Dreams': '#06B6D4', 
+  'Pre-Echo Dreams': '#10B981',
+  'Lucid Dreams': '#F59E0B',
+  'Meta-Lucid Dreams': '#EF4444',
+};
 
 export default function InsightsScreen() {
   const insets = useSafeAreaInsets();
@@ -24,10 +33,20 @@ export default function InsightsScreen() {
   const limnusCount = dreams.filter(d => d.persona === 'limnus').length;
   const totalDreams = dreams.length;
   
+  // Dream type statistics
+  const dreamTypeStats = dreams.reduce((acc, dream) => {
+    if (dream.dreamType) {
+      acc[dream.dreamType] = (acc[dream.dreamType] || 0) + 1;
+    }
+    return acc;
+  }, {} as Record<DreamType, number>);
+  
   const recentDreams = dreams.slice(0, 5);
   const averageLength = Math.round(
     dreams.reduce((sum, dream) => sum + dream.text.length, 0) / totalDreams
   );
+  
+  const dreamsWithTypes = dreams.filter(d => d.dreamType).length;
   
   return (
     <ScrollView 
@@ -54,7 +73,40 @@ export default function InsightsScreen() {
           <Text style={styles.statNumber}>{averageLength}</Text>
           <Text style={styles.statLabel}>Avg. Characters</Text>
         </View>
+        
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{dreamsWithTypes}</Text>
+          <Text style={styles.statLabel}>Classified Dreams</Text>
+        </View>
       </View>
+      
+      {dreamsWithTypes > 0 && (
+        <View style={styles.dreamTypeStatsContainer}>
+          <Text style={styles.sectionTitle}>Dream Type Distribution</Text>
+          
+          {Object.entries(dreamTypeStats).map(([type, count]) => (
+            <View key={type} style={styles.dreamTypeStatCard}>
+              <View style={styles.dreamTypeHeader}>
+                <Text style={[styles.dreamTypeName, { color: dreamTypeColors[type as DreamType] }]}>
+                  {type}
+                </Text>
+                <Text style={styles.dreamTypeCount}>{count} dreams</Text>
+              </View>
+              <View style={styles.progressBar}>
+                <View 
+                  style={[
+                    styles.progressFill, 
+                    { 
+                      width: `${(count / dreamsWithTypes) * 100}%`,
+                      backgroundColor: dreamTypeColors[type as DreamType]
+                    }
+                  ]} 
+                />
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
       
       <View style={styles.personaStatsContainer}>
         <Text style={styles.sectionTitle}>Persona Preferences</Text>
@@ -105,12 +157,22 @@ export default function InsightsScreen() {
         {recentDreams.map((dream, index) => (
           <View key={dream.id} style={styles.recentItem}>
             <View style={styles.recentHeader}>
-              <Text style={[
-                styles.recentPersona, 
-                { color: getPersona(dream.persona).color }
-              ]}>
-                {getPersona(dream.persona).name}
-              </Text>
+              <View style={styles.recentBadges}>
+                <Text style={[
+                  styles.recentPersona, 
+                  { color: getPersona(dream.persona).color }
+                ]}>
+                  {getPersona(dream.persona).name}
+                </Text>
+                {dream.dreamType && (
+                  <Text style={[
+                    styles.recentDreamType,
+                    { color: dreamTypeColors[dream.dreamType] }
+                  ]}>
+                    {dream.dreamType.replace(' Dreams', '')}
+                  </Text>
+                )}
+              </View>
               <Text style={styles.recentDate}>
                 {new Date(dream.date).toLocaleDateString()}
               </Text>
@@ -125,7 +187,7 @@ export default function InsightsScreen() {
       <View style={styles.infoContainer}>
         <Text style={styles.infoTitle}>About Your Journey</Text>
         <Text style={styles.infoText}>
-          Each dream interpretation adds to your personal understanding. Orion provides analytical insights while Limnus offers poetic wisdom. Together, they help you explore the depths of your subconscious mind.
+          Each dream interpretation adds to your personal understanding. Orion provides analytical insights while Limnus offers poetic wisdom. The classification system reveals patterns across five dream types: Mnemonic (past), Psychic (present), Pre-Echo (future), Lucid (awareness), and Meta-Lucid (recursive consciousness).
         </Text>
       </View>
     </ScrollView>
@@ -174,8 +236,9 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 14,
     color: Colors.dark.subtext,
+    textAlign: 'center',
   },
-  personaStatsContainer: {
+  dreamTypeStatsContainer: {
     marginBottom: 24,
   },
   sectionTitle: {
@@ -183,6 +246,29 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.dark.text,
     marginBottom: 16,
+  },
+  dreamTypeStatCard: {
+    backgroundColor: Colors.dark.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  dreamTypeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  dreamTypeName: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  dreamTypeCount: {
+    fontSize: 14,
+    color: Colors.dark.subtext,
+  },
+  personaStatsContainer: {
+    marginBottom: 24,
   },
   personaStatCard: {
     backgroundColor: Colors.dark.card,
@@ -226,12 +312,21 @@ const styles = StyleSheet.create({
   recentHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 8,
+  },
+  recentBadges: {
+    flexDirection: 'row',
+    gap: 8,
+    flex: 1,
   },
   recentPersona: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  recentDreamType: {
+    fontSize: 14,
+    fontWeight: '500',
   },
   recentDate: {
     fontSize: 14,
