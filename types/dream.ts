@@ -28,3 +28,14 @@ export interface InterpretationResponse {
   rationale: string;
   interpretation: string;
 }
+
+export interface DreamTypeInfo {
+  name: DreamType;
+  timeIndex: string;
+  primaryFunction: string;
+  symbolicField: string;
+  typicalPhenomena: string;
+  symbol: string;
+  position: 'past' | 'present' | 'future' | 'now' | 'recursive';
+  color: string;
+}

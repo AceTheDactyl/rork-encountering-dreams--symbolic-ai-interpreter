@@ -6,23 +6,8 @@ import { Share2, Trash2 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useDreamStore } from '@/store/dreamStore';
 import { getPersona } from '@/constants/personas';
+import { getDreamTypeInfo } from '@/constants/dreamTypes';
 import Button from '@/components/Button';
-
-const dreamTypeColors = {
-  'Mnemonic Dreams': '#8B5CF6',
-  'Psychic Dreams': '#06B6D4', 
-  'Pre-Echo Dreams': '#10B981',
-  'Lucid Dreams': '#F59E0B',
-  'Meta-Lucid Dreams': '#EF4444',
-};
-
-const dreamTypeDescriptions = {
-  'Mnemonic Dreams': 'Past-focused • Memory recursion • Echo fields',
-  'Psychic Dreams': 'Present-focused • Emotional integration • Stress grid',
-  'Pre-Echo Dreams': 'Future-focused • Probability tuning • Vector threads',
-  'Lucid Dreams': 'Now/overlaid • Symbol control • Agency kernel',
-  'Meta-Lucid Dreams': 'Recursive/all • Architectural interface • Compression core',
-};
 
 export default function DreamDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -47,7 +32,7 @@ export default function DreamDetailScreen() {
   }
   
   const persona = getPersona(dream.persona);
-  const dreamTypeColor = dream.dreamType ? dreamTypeColors[dream.dreamType] : Colors.dark.subtext;
+  const dreamTypeInfo = dream.dreamType ? getDreamTypeInfo(dream.dreamType) : null;
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -63,7 +48,10 @@ export default function DreamDetailScreen() {
   
   const handleShare = async () => {
     try {
-      const dreamTypeInfo = dream.dreamType ? `\n\nDream Type: ${dream.dreamType}\n${dream.rationale || ''}` : '';
+      const dreamTypeInfo = dream.dreamType ? `
+
+Dream Type: ${dream.dreamType}
+${dream.rationale || ''}` : '';
       
       await Share.share({
         title: `Dream interpreted by ${persona.name}`,
@@ -107,9 +95,10 @@ Interpreted on ${formatDate(dream.date)}`,
                 {persona.name}
               </Text>
             </View>
-            {dream.dreamType && (
-              <View style={[styles.dreamTypeBadge, { backgroundColor: dreamTypeColor + '33' }]}>
-                <Text style={[styles.dreamTypeText, { color: dreamTypeColor }]}>
+            {dreamTypeInfo && (
+              <View style={[styles.dreamTypeBadge, { backgroundColor: dreamTypeInfo.color + '33' }]}>
+                <Text style={styles.dreamTypeSymbol}>{dreamTypeInfo.symbol}</Text>
+                <Text style={[styles.dreamTypeText, { color: dreamTypeInfo.color }]}>
                   {dream.dreamType}
                 </Text>
               </View>
@@ -119,13 +108,21 @@ Interpreted on ${formatDate(dream.date)}`,
         </View>
       </View>
       
-      {dream.dreamType && (
-        <View style={[styles.dreamTypeContainer, { borderLeftColor: dreamTypeColor }]}>
-          <Text style={[styles.dreamTypeTitle, { color: dreamTypeColor }]}>
-            {dream.dreamType}
-          </Text>
+      {dreamTypeInfo && (
+        <View style={[styles.dreamTypeContainer, { borderLeftColor: dreamTypeInfo.color }]}>
+          <View style={styles.dreamTypeHeader}>
+            <Text style={styles.dreamTypeSymbolLarge}>{dreamTypeInfo.symbol}</Text>
+            <View style={styles.dreamTypeDetails}>
+              <Text style={[styles.dreamTypeTitle, { color: dreamTypeInfo.color }]}>
+                {dream.dreamType}
+              </Text>
+              <Text style={styles.dreamTypeTimeIndex}>
+                {dreamTypeInfo.timeIndex} • {dreamTypeInfo.primaryFunction}
+              </Text>
+            </View>
+          </View>
           <Text style={styles.dreamTypeDescription}>
-            {dreamTypeDescriptions[dream.dreamType]}
+            {dreamTypeInfo.symbolicField} • {dreamTypeInfo.typicalPhenomena}
           </Text>
           {dream.rationale && (
             <Text style={styles.rationaleText}>
@@ -203,9 +200,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   dreamTypeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
+    gap: 6,
+  },
+  dreamTypeSymbol: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   dreamTypeText: {
     fontSize: 14,
@@ -222,10 +226,28 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     borderLeftWidth: 4,
   },
+  dreamTypeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  dreamTypeSymbolLarge: {
+    fontSize: 24,
+    marginRight: 12,
+    color: Colors.dark.text,
+    fontWeight: '600',
+  },
+  dreamTypeDetails: {
+    flex: 1,
+  },
   dreamTypeTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: 2,
+  },
+  dreamTypeTimeIndex: {
+    fontSize: 13,
+    color: Colors.dark.subtext,
   },
   dreamTypeDescription: {
     fontSize: 14,

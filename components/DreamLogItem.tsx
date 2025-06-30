@@ -3,23 +3,17 @@ import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Dream } from '@/types/dream';
 import { getPersona } from '@/constants/personas';
+import { getDreamTypeInfo } from '@/constants/dreamTypes';
 import Colors from '@/constants/colors';
 
 interface DreamLogItemProps {
   dream: Dream;
 }
 
-const dreamTypeColors = {
-  'Mnemonic Dreams': '#8B5CF6',
-  'Psychic Dreams': '#06B6D4', 
-  'Pre-Echo Dreams': '#10B981',
-  'Lucid Dreams': '#F59E0B',
-  'Meta-Lucid Dreams': '#EF4444',
-};
-
 export default function DreamLogItem({ dream }: DreamLogItemProps) {
   const router = useRouter();
   const persona = getPersona(dream.persona);
+  const dreamTypeInfo = dream.dreamType ? getDreamTypeInfo(dream.dreamType) : null;
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -41,8 +35,6 @@ export default function DreamLogItem({ dream }: DreamLogItemProps) {
     router.push(`/dream/${dream.id}`);
   };
   
-  const dreamTypeColor = dream.dreamType ? dreamTypeColors[dream.dreamType] : Colors.dark.subtext;
-  
   return (
     <Pressable style={styles.container} onPress={handlePress}>
       <View style={styles.header}>
@@ -52,10 +44,11 @@ export default function DreamLogItem({ dream }: DreamLogItemProps) {
               {persona.name}
             </Text>
           </View>
-          {dream.dreamType && (
-            <View style={[styles.dreamTypeBadge, { backgroundColor: dreamTypeColor + '33' }]}>
-              <Text style={[styles.dreamTypeText, { color: dreamTypeColor }]}>
-                {dream.dreamType.replace(' Dreams', '')}
+          {dreamTypeInfo && (
+            <View style={[styles.dreamTypeBadge, { backgroundColor: dreamTypeInfo.color + '33' }]}>
+              <Text style={styles.dreamTypeSymbol}>{dreamTypeInfo.symbol}</Text>
+              <Text style={[styles.dreamTypeText, { color: dreamTypeInfo.color }]}>
+                {dream.dreamType?.replace(' Dreams', '')}
               </Text>
             </View>
           )}
@@ -67,9 +60,11 @@ export default function DreamLogItem({ dream }: DreamLogItemProps) {
         {truncateText(dream.text)}
       </Text>
       
-      {dream.rationale && (
+      {dream.rationale && dreamTypeInfo && (
         <View style={styles.rationaleContainer}>
-          <Text style={styles.rationaleLabel}>Classification:</Text>
+          <Text style={styles.rationaleLabel}>
+            {dreamTypeInfo.timeIndex} Classification:
+          </Text>
           <Text style={styles.rationaleText}>
             {truncateText(dream.rationale, 120)}
           </Text>
@@ -106,6 +101,7 @@ const styles = StyleSheet.create({
     gap: 8,
     flex: 1,
     flexWrap: 'wrap',
+    alignItems: 'center',
   },
   personaBadge: {
     paddingHorizontal: 12,
@@ -117,9 +113,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   dreamTypeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
+    gap: 4,
+  },
+  dreamTypeSymbol: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   dreamTypeText: {
     fontSize: 12,

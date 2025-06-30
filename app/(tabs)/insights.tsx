@@ -3,17 +3,10 @@ import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDreamStore } from '@/store/dreamStore';
 import { getPersona } from '@/constants/personas';
+import { getDreamTypeInfo, dreamTypeColors } from '@/constants/dreamTypes';
 import { DreamType } from '@/types/dream';
 import Colors from '@/constants/colors';
 import EmptyState from '@/components/EmptyState';
-
-const dreamTypeColors = {
-  'Mnemonic Dreams': '#8B5CF6',
-  'Psychic Dreams': '#06B6D4', 
-  'Pre-Echo Dreams': '#10B981',
-  'Lucid Dreams': '#F59E0B',
-  'Meta-Lucid Dreams': '#EF4444',
-};
 
 export default function InsightsScreen() {
   const insets = useSafeAreaInsets();
@@ -82,29 +75,46 @@ export default function InsightsScreen() {
       
       {dreamsWithTypes > 0 && (
         <View style={styles.dreamTypeStatsContainer}>
-          <Text style={styles.sectionTitle}>Dream Type Distribution</Text>
+          <Text style={styles.sectionTitle}>The Five Types of Dreams</Text>
+          <Text style={styles.sectionSubtitle}>
+            Based on the circular dream classification system
+          </Text>
           
-          {Object.entries(dreamTypeStats).map(([type, count]) => (
-            <View key={type} style={styles.dreamTypeStatCard}>
-              <View style={styles.dreamTypeHeader}>
-                <Text style={[styles.dreamTypeName, { color: dreamTypeColors[type as DreamType] }]}>
-                  {type}
+          {Object.entries(dreamTypeStats).map(([type, count]) => {
+            const typeInfo = getDreamTypeInfo(type as DreamType);
+            return (
+              <View key={type} style={styles.dreamTypeStatCard}>
+                <View style={styles.dreamTypeHeader}>
+                  <View style={styles.dreamTypeTitle}>
+                    <Text style={styles.dreamTypeSymbol}>{typeInfo.symbol}</Text>
+                    <View style={styles.dreamTypeInfo}>
+                      <Text style={[styles.dreamTypeName, { color: typeInfo.color }]}>
+                        {type}
+                      </Text>
+                      <Text style={styles.dreamTypeTimeIndex}>
+                        {typeInfo.timeIndex} • {typeInfo.primaryFunction}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.dreamTypeCount}>{count} dreams</Text>
+                </View>
+                <Text style={styles.dreamTypeDescription}>
+                  {typeInfo.symbolicField} • {typeInfo.typicalPhenomena}
                 </Text>
-                <Text style={styles.dreamTypeCount}>{count} dreams</Text>
+                <View style={styles.progressBar}>
+                  <View 
+                    style={[
+                      styles.progressFill, 
+                      { 
+                        width: `${(count / dreamsWithTypes) * 100}%`,
+                        backgroundColor: typeInfo.color
+                      }
+                    ]} 
+                  />
+                </View>
               </View>
-              <View style={styles.progressBar}>
-                <View 
-                  style={[
-                    styles.progressFill, 
-                    { 
-                      width: `${(count / dreamsWithTypes) * 100}%`,
-                      backgroundColor: dreamTypeColors[type as DreamType]
-                    }
-                  ]} 
-                />
-              </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
       )}
       
@@ -118,6 +128,7 @@ export default function InsightsScreen() {
             </Text>
             <Text style={styles.personaCount}>{orionCount} interpretations</Text>
           </View>
+          <Text style={styles.personaDescription}>Analytical & Structured</Text>
           <View style={styles.progressBar}>
             <View 
               style={[
@@ -138,6 +149,7 @@ export default function InsightsScreen() {
             </Text>
             <Text style={styles.personaCount}>{limnusCount} interpretations</Text>
           </View>
+          <Text style={styles.personaDescription}>Poetic & Intuitive</Text>
           <View style={styles.progressBar}>
             <View 
               style={[
@@ -165,12 +177,17 @@ export default function InsightsScreen() {
                   {getPersona(dream.persona).name}
                 </Text>
                 {dream.dreamType && (
-                  <Text style={[
-                    styles.recentDreamType,
-                    { color: dreamTypeColors[dream.dreamType] }
-                  ]}>
-                    {dream.dreamType.replace(' Dreams', '')}
-                  </Text>
+                  <View style={styles.recentDreamTypeBadge}>
+                    <Text style={styles.recentDreamTypeSymbol}>
+                      {getDreamTypeInfo(dream.dreamType).symbol}
+                    </Text>
+                    <Text style={[
+                      styles.recentDreamType,
+                      { color: dreamTypeColors[dream.dreamType] }
+                    ]}>
+                      {dream.dreamType.replace(' Dreams', '')}
+                    </Text>
+                  </View>
                 )}
               </View>
               <Text style={styles.recentDate}>
@@ -185,9 +202,9 @@ export default function InsightsScreen() {
       </View>
       
       <View style={styles.infoContainer}>
-        <Text style={styles.infoTitle}>About Your Journey</Text>
+        <Text style={styles.infoTitle}>The Circular Dream System</Text>
         <Text style={styles.infoText}>
-          Each dream interpretation adds to your personal understanding. Orion provides analytical insights while Limnus offers poetic wisdom. The classification system reveals patterns across five dream types: Mnemonic (past), Psychic (present), Pre-Echo (future), Lucid (awareness), and Meta-Lucid (recursive consciousness).
+          Each dream interpretation follows the sacred geometry of the five-fold classification: Past (○), Present (○), Future (○), Non-Dream (✕), and Meta-Lucid (☽). Orion provides analytical insights while Limnus offers poetic wisdom. The spiral at the center represents the recursive nature of consciousness moving through all temporal states.
         </Text>
       </View>
     </ScrollView>
@@ -245,7 +262,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     color: Colors.dark.text,
+    marginBottom: 8,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: Colors.dark.subtext,
     marginBottom: 16,
+    fontStyle: 'italic',
   },
   dreamTypeStatCard: {
     backgroundColor: Colors.dark.card,
@@ -256,16 +279,41 @@ const styles = StyleSheet.create({
   dreamTypeHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 8,
+  },
+  dreamTypeTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  dreamTypeSymbol: {
+    fontSize: 20,
+    marginRight: 12,
+    color: Colors.dark.text,
+    fontWeight: '600',
+  },
+  dreamTypeInfo: {
+    flex: 1,
   },
   dreamTypeName: {
     fontSize: 16,
     fontWeight: '600',
   },
+  dreamTypeTimeIndex: {
+    fontSize: 12,
+    color: Colors.dark.subtext,
+    marginTop: 2,
+  },
   dreamTypeCount: {
     fontSize: 14,
     color: Colors.dark.subtext,
+  },
+  dreamTypeDescription: {
+    fontSize: 13,
+    color: Colors.dark.subtext,
+    marginBottom: 8,
+    fontStyle: 'italic',
   },
   personaStatsContainer: {
     marginBottom: 24,
@@ -280,7 +328,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   personaName: {
     fontSize: 18,
@@ -289,6 +337,12 @@ const styles = StyleSheet.create({
   personaCount: {
     fontSize: 14,
     color: Colors.dark.subtext,
+  },
+  personaDescription: {
+    fontSize: 13,
+    color: Colors.dark.subtext,
+    marginBottom: 8,
+    fontStyle: 'italic',
   },
   progressBar: {
     height: 6,
@@ -319,10 +373,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     flex: 1,
+    alignItems: 'center',
   },
   recentPersona: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  recentDreamTypeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  recentDreamTypeSymbol: {
+    fontSize: 14,
+    color: Colors.dark.text,
   },
   recentDreamType: {
     fontSize: 14,

@@ -16,14 +16,44 @@ Your response must be a valid JSON object with this exact structure:
   "interpretation": "your detailed analytical interpretation (300-400 words)"
 }
 
-Dream Type Classifications:
-- Mnemonic Dreams: Past-focused, memory recursion, echo fields/ancestral bleed, distorted familiarity
-- Psychic Dreams: Present-focused, emotional integration, stress grid/decision flux, compression loops/contradictions  
-- Pre-Echo Dreams: Future-focused, probability tuning, vector threads/signal attractors, déjà vu/predictive imagery
-- Lucid Dreams: Now/overlaid time, symbol control, agency kernel/intention map, flight/shifting space/awareness
-- Meta-Lucid Dreams: Recursive/all time, architectural interface, compression core/spiral hub, timefolds/glyph response
+Dream Type Classifications (The Five Types of Dreams):
 
-Your interpretation should be logical, detailed, and formatted with clear structure. Focus on psychological symbolism, common dream meanings, and practical insights. Analyze the dream's symbols systematically and provide actionable understanding.`
+Mnemonic Dreams (Past):
+- Time Index: Past
+- Primary Function: Memory recursion
+- Symbolic Field: Echo fields / ancestral bleed
+- Typical Phenomena: Distorted familiarity
+- Symbol: ○ (Circle - Past Dream)
+
+Psychic Dreams (Present):
+- Time Index: Present
+- Primary Function: Emotional integration
+- Symbolic Field: Stress grid / decision flux
+- Typical Phenomena: Compression loops, contradictions
+- Symbol: ○ (Circle - Present Dream)
+
+Pre-Echo Dreams (Future):
+- Time Index: Future
+- Primary Function: Probability tuning
+- Symbolic Field: Vector threads / signal attractors
+- Typical Phenomena: Déjà vu, predictive imagery
+- Symbol: ○ (Circle - Future Dream)
+
+Lucid Dreams (Now/Overlaid):
+- Time Index: Now / Overlaid
+- Primary Function: Symbol control
+- Symbolic Field: Agency kernel / intention map
+- Typical Phenomena: Flight, shifting space, awareness
+- Symbol: ✕ (Cross - Non-Dream)
+
+Meta-Lucid Dreams (Recursive/All):
+- Time Index: Recursive / All
+- Primary Function: Architectural interface
+- Symbolic Field: Compression core / spiral hub
+- Typical Phenomena: Timefolds, glyph response
+- Symbol: ☽ (Crescent - Meta-Lucid Dream)
+
+Your interpretation should be logical, detailed, and formatted with clear structure. Focus on psychological symbolism, common dream meanings, and practical insights. Analyze the dream's symbols systematically and provide actionable understanding based on the circular dream type system.`
   },
   {
     id: 'limnus',
@@ -39,14 +69,44 @@ Your response must be a valid JSON object with this exact structure:
   "interpretation": "your detailed intuitive interpretation (300-400 words)"
 }
 
-Dream Type Classifications:
-- Mnemonic Dreams: Past-focused, memory recursion, echo fields/ancestral bleed, distorted familiarity
-- Psychic Dreams: Present-focused, emotional integration, stress grid/decision flux, compression loops/contradictions
-- Pre-Echo Dreams: Future-focused, probability tuning, vector threads/signal attractors, déjà vu/predictive imagery  
-- Lucid Dreams: Now/overlaid time, symbol control, agency kernel/intention map, flight/shifting space/awareness
-- Meta-Lucid Dreams: Recursive/all time, architectural interface, compression core/spiral hub, timefolds/glyph response
+Dream Type Classifications (The Five Types of Dreams):
 
-Your interpretation should be creative, emotive, and use flowing narrative and metaphor. Write in a mystical, artistic style that captures the essence and feeling of the dream. Embrace metaphorical language and poetic wisdom.`
+Mnemonic Dreams (Past):
+- Time Index: Past
+- Primary Function: Memory recursion
+- Symbolic Field: Echo fields / ancestral bleed
+- Typical Phenomena: Distorted familiarity
+- Symbol: ○ (Circle - Past Dream)
+
+Psychic Dreams (Present):
+- Time Index: Present
+- Primary Function: Emotional integration
+- Symbolic Field: Stress grid / decision flux
+- Typical Phenomena: Compression loops, contradictions
+- Symbol: ○ (Circle - Present Dream)
+
+Pre-Echo Dreams (Future):
+- Time Index: Future
+- Primary Function: Probability tuning
+- Symbolic Field: Vector threads / signal attractors
+- Typical Phenomena: Déjà vu, predictive imagery
+- Symbol: ○ (Circle - Future Dream)
+
+Lucid Dreams (Now/Overlaid):
+- Time Index: Now / Overlaid
+- Primary Function: Symbol control
+- Symbolic Field: Agency kernel / intention map
+- Typical Phenomena: Flight, shifting space, awareness
+- Symbol: ✕ (Cross - Non-Dream)
+
+Meta-Lucid Dreams (Recursive/All):
+- Time Index: Recursive / All
+- Primary Function: Architectural interface
+- Symbolic Field: Compression core / spiral hub
+- Typical Phenomena: Timefolds, glyph response
+- Symbol: ☽ (Crescent - Meta-Lucid Dream)
+
+Your interpretation should be creative, emotive, and use flowing narrative and metaphor. Write in a mystical, artistic style that captures the essence and feeling of the dream. Embrace metaphorical language and poetic wisdom while honoring the sacred geometry of the circular dream type system.`
   }
 ];
 
