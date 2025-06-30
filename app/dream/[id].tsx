@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, Pressable, Share } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Pressable, Share, Platform, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Share2, Trash2 } from 'lucide-react-native';
+import { Share2, Trash2, Copy } from 'lucide-react-native';
+import * as Clipboard from 'expo-clipboard';
 import Colors from '@/constants/colors';
 import { useDreamStore } from '@/store/dreamStore';
 import { getPersona } from '@/constants/personas';
@@ -46,11 +47,8 @@ export default function DreamDetailScreen() {
     });
   };
   
-  const handleShare = async () => {
-    try {
-      await Share.share({
-        title: dream.name,
-        message: `${dream.name}
+  const getShareContent = () => {
+    return `${dream.name}
 
 My Dream (${dreamType?.name || 'Unknown Type'}):
 
@@ -60,10 +58,65 @@ ${persona.name}'s Interpretation:
 
 ${dream.interpretation}
 
-Interpreted on ${formatDate(dream.date)}`,
-      });
+Interpreted on ${formatDate(dream.date)}`;
+  };
+  
+  const handleShare = async () => {
+    const shareContent = getShareContent();
+    
+    try {
+      if (Platform.OS === 'web') {
+        // For web, try navigator.share first, then fallback to clipboard
+        if (navigator.share && navigator.canShare && navigator.canShare({ text: shareContent })) {
+          await navigator.share({
+            title: dream.name,
+            text: shareContent,
+          });
+        } else {
+          // Fallback to clipboard for web
+          await handleCopyToClipboard();
+        }
+      } else {
+        // For mobile platforms, use React Native's Share API
+        await Share.share({
+          title: dream.name,
+          message: shareContent,
+        });
+      }
+    } catch (error: any) {
+      console.error('Share error:', error);
+      
+      // If sharing fails, offer to copy to clipboard instead
+      if (error.name === 'NotAllowedError' || error.name === 'AbortError') {
+        Alert.alert(
+          'Share Not Available',
+          'Would you like to copy the interpretation to your clipboard instead?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Copy', onPress: handleCopyToClipboard }
+          ]
+        );
+      } else {
+        // For other errors, just copy to clipboard
+        await handleCopyToClipboard();
+      }
+    }
+  };
+  
+  const handleCopyToClipboard = async () => {
+    try {
+      const shareContent = getShareContent();
+      await Clipboard.setStringAsync(shareContent);
+      
+      if (Platform.OS === 'web') {
+        // For web, show a simple alert
+        alert('Dream interpretation copied to clipboard!');
+      } else {
+        Alert.alert('Copied!', 'Dream interpretation copied to clipboard');
+      }
     } catch (error) {
-      console.error(error);
+      console.error('Clipboard error:', error);
+      Alert.alert('Error', 'Failed to copy to clipboard');
     }
   };
   
@@ -152,6 +205,13 @@ Interpreted on ${formatDate(dream.date)}`,
           style={styles.shareButton}
           icon={<Share2 size={20} color={Colors.dark.primary} style={{ marginRight: 8 }} />}
         />
+        
+        <Pressable 
+          style={styles.copyButton}
+          onPress={handleCopyToClipboard}
+        >
+          <Copy size={20} color={Colors.dark.subtext} />
+        </Pressable>
         
         <Pressable 
           style={[styles.deleteButton, showDeleteConfirm && styles.deleteConfirmButton]} 
@@ -297,7 +357,16 @@ const styles = StyleSheet.create({
   },
   shareButton: {
     flex: 1,
-    marginRight: 16,
+    marginRight: 12,
+  },
+  copyButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.dark.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   deleteButton: {
     width: 48,
